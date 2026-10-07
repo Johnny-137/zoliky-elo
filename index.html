@@ -169,7 +169,8 @@ const VIEWS = {
       return `<div class="game"><b>#${i + 1}</b>${ps.map(([p, v]) => { const d = fmt(h.after[p]) - fmt(h.before[p]);
         const rc = rank(h.after[p]) !== rank(h.before[p]) ? (tier(rank(h.after[p])) > tier(rank(h.before[p])) ? " ⬆" : " ⬇") : "";
         return `<span class="chip">${name(p)} ${v === 0 ? "🏆" : v} <span class="${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}${rc}</span></span>`; }).join("")}
-        ${changed ? `<button data-play="${i}" aria-label="Přehrát animaci">▶</button>` : ""}</div>`; }).reverse().join("")}</div>`;
+        ${changed ? `<button data-play="${i}" aria-label="Přehrát animaci">▶</button>` : ""}
+        ${admin() && cur === D.seasons[0] ? `<button data-del="${i}" aria-label="Smazat hru">🗑</button>` : ""}</div>`; }).reverse().join("")}</div>`;
   },
   vyvoj() {
     const { hist, table } = S[cur.id];
@@ -184,7 +185,10 @@ const VIEWS = {
       <form id="zf"><table>${known.map(p => `<tr><td>${esc(p)}</td><td><input type="number" min="0" step="1" name="${esc(p)}" inputmode="numeric"></td></tr>`).join("")}
       <tr><td><input type="text" id="novy" placeholder="Nový hráč (jméno)"></td><td><input type="number" min="0" step="1" id="novyb" placeholder="body"></td></tr></table>
       <p><input type="password" id="heslo" placeholder="Heslo" value="${esc(store("zoliky-heslo") || "")}"> <button>Uložit hru</button></p>
-      <p id="zmsg" class="muted" role="status"></p></form></div>`;
+      <p id="zmsg" class="muted" role="status"></p></form></div>
+      <div class="panel"><h2>Admin</h2>${admin()
+        ? `<p>Jsi přihlášený jako admin – v záložce Hry můžeš hry mazat 🗑.</p><button id="odhlasit">Odhlásit</button>`
+        : `<form id="af"><input type="password" id="aheslo" placeholder="Admin heslo"> <button>Přihlásit</button> <span id="amsg" class="muted" role="status"></span></form>`}</div>`;
   },
   patch() {
     return `<div class="panel"><h2>Patch 1.1 · 29. 9. 2026</h2><p>Elo se nově počítá hlavně podle toho, s kolika body kdo skončí – ne jen podle toho, kdo zavřel.</p><ul>
@@ -253,11 +257,44 @@ document.addEventListener("submit", async e => {
     const r = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ heslo, hra }) }).then(x => x.json());
     if (!r.ok) return msg.textContent = r.chyba || "Uložení selhalo.";
     store("zoliky-heslo", heslo);
-    // načti znovu z tabulky; když tabulka ještě nestihla, přidej hru lokálně
-    try { Object.assign(D.seasons[0], await live()); } catch { D.seasons[0].games.push(hra); if (novy) D.seasons[0].players.push(novy); }
-    S[D.seasons[0].id] = stats(D.seasons[0]);
-    cur = D.seasons[0]; $("#season").value = cur.id; tab = "hry"; render(); autoPlay();
+    // když tabulka ještě nestihla, přidej hru lokálně
+    await reload(s => { s.games.push(hra); if (novy) s.players.push(novy); });
+    autoPlay();
   } catch (err) { msg.textContent = "Nepodařilo se spojit s tabulkou: " + err.message; }
+});
+
+// --- admin: mazání her ---
+const admin = () => store("zoliky-admin");
+const post = body => fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(body) }).then(x => x.json());
+async function reload(fallback) {
+  const s = D.seasons[0];
+  try { Object.assign(s, await live()); } catch { fallback(s); }
+  S[s.id] = stats(s);
+  cur = s; $("#season").value = s.id; tab = "hry"; render();
+}
+document.addEventListener("submit", async e => {
+  if (e.target.id !== "af") return;
+  e.preventDefault();
+  $("#amsg").textContent = "Ověřuji…";
+  const heslo = $("#aheslo").value;
+  try {
+    const r = await post({ akce: "overit", heslo });
+    if (!r.admin) return $("#amsg").textContent = "Tohle není admin heslo.";
+    store("zoliky-admin", heslo); render();
+  } catch (err) { $("#amsg").textContent = "Nepodařilo se spojit s tabulkou: " + err.message; }
+});
+document.addEventListener("click", async e => {
+  if (e.target.id === "odhlasit") { try { localStorage.removeItem("zoliky-admin"); } catch {} return render(); }
+  const b = e.target.closest("[data-del]");
+  if (!b) return;
+  const i = +b.dataset.del;
+  if (!confirm(`Opravdu smazat hru #${i + 1}? Další hry se posunou o jedno číslo dolů.`)) return;
+  b.disabled = true;
+  try {
+    const r = await post({ akce: "smazat", heslo: admin(), cislo: i + 1 });
+    if (!r.ok) { alert(r.chyba || "Smazání selhalo."); b.disabled = false; return; }
+    await reload(s => s.games.splice(i, 1));
+  } catch (err) { alert("Nepodařilo se spojit s tabulkou: " + err.message); b.disabled = false; }
 });
 
 // --- rank up / rank down animace ---
