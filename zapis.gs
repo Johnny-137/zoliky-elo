@@ -8,6 +8,15 @@ function doPost(e) {
   const admin = d.heslo === ADMIN_HESLO;
   if (!admin && d.heslo !== HESLO) return out({ ok: false, chyba: "Špatné heslo" });
   if (d.akce === "overit") return out({ ok: true, admin });
+  if (d.akce === "web") {
+    // Nastavení webu z editoru (název, barvy, patch notes, CSS) jako JSON v listu Web.
+    if (!admin) return out({ ok: false, chyba: "Upravovat web může jen admin" });
+    const json = JSON.stringify(d.web);
+    if (!d.web || typeof d.web !== "object" || json.length > 45000) return out({ ok: false, chyba: "Nastavení je moc velké" });
+    const ss = SpreadsheetApp.getActive();
+    (ss.getSheetByName("Web") || ss.insertSheet("Web")).getRange("A1").setNumberFormat("@").setValue(json);
+    return out({ ok: true });
+  }
   const sh = SpreadsheetApp.getActive().getSheetByName("Hry");
   const lock = LockService.getScriptLock();
   lock.waitLock(10000);

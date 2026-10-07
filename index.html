@@ -19,7 +19,7 @@ nav{max-width:1100px;margin:12px auto 0;padding:0 16px;display:flex;gap:4px;over
 nav button{border:0;background:none;color:var(--muted);text-transform:uppercase;font-weight:700;font-size:.8rem;letter-spacing:.08em;padding:10px 12px;white-space:nowrap}
 nav button.on{color:var(--gold2);box-shadow:inset 0 -2px var(--gold)}
 main{max-width:1100px;margin:auto;padding:16px}
-.panel{background:linear-gradient(#0a1428ee,#091220ee);border:1px solid var(--line);padding:14px;margin-bottom:14px}
+.panel{background:var(--panel);border:1px solid var(--line);padding:14px;margin-bottom:14px}
 table{width:100%;border-collapse:collapse}
 th{font-size:.72rem;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px}
 td{padding:8px 6px;border-top:1px solid #1e2328}
@@ -37,6 +37,13 @@ td{padding:8px 6px;border-top:1px solid #1e2328}
 .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.8rem}
 .legend span::before{content:"";display:inline-block;width:10px;height:10px;margin-right:4px;background:var(--c)}
 /* profil */
+.ed label{display:block;margin:8px 0}
+.ed fieldset{border:1px solid var(--line);margin:14px 0;padding:10px}
+.ed legend{color:var(--gold2);font-weight:700;padding:0 6px}
+.ed textarea,.ed input:not([type=color]){width:100%;font:inherit;background:#1e2328;color:var(--gold2);border:1px solid var(--gold);padding:6px}
+.ed textarea[name=css]{font-family:ui-monospace,monospace}
+.ed input[type=color]{width:44px;height:30px;padding:0;vertical-align:middle}
+.pe{display:grid;gap:6px;padding:10px 0;border-bottom:1px solid #1e2328}
 #bubs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
 .bub{cursor:pointer}
 .bub input{position:absolute;opacity:0}
@@ -146,6 +153,8 @@ async function init() {
   let src = "uložená kopie";
   try { Object.assign(D.seasons[0], await live()); src = "živě z Google tabulky"; } catch (e) { console.warn("Tabulka nedostupná, beru data.json", e); }
   D.src = src;
+  try { Object.assign(WEB, JSON.parse(csv(await fetch(SHEET.replace("sheet=Hry", "sheet=Web") + "A1").then(r => r.text()))[0][0])); } catch (e) { console.warn("Nastavení webu nenalezeno, beru výchozí", e); }
+  applyWeb();
   D.seasons.forEach(s => S[s.id] = stats(s));
   $("#season").innerHTML = D.seasons.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join("");
   $("#season").onchange = e => { cur = D.seasons.find(s => s.id === e.target.value); render(); };
@@ -155,9 +164,10 @@ async function init() {
 }
 
 // --- pohledy ---
-const TABS = { zebricek: "Žebříček", hry: "Hry", zapis: "Zápis hry", vyvoj: "Vývoj Elo", patch: "Patch notes", pravidla: "Pravidla" };
+const TABS = { zebricek: "Žebříček", hry: "Hry", zapis: "Zápis hry", vyvoj: "Vývoj Elo", patch: "Patch notes", pravidla: "Pravidla", editor: "🛠 Editor" };
 function render() {
-  $("#tabs").innerHTML = Object.entries(TABS).map(([k, v]) => `<button class="${k === tab ? "on" : ""}" data-t="${k}">${v}</button>`).join("");
+  if (tab === "editor" && !admin()) tab = "zebricek";
+  $("#tabs").innerHTML = Object.entries(TABS).filter(([k]) => k !== "editor" || admin()).map(([k, v]) => `<button class="${k === tab ? "on" : ""}" data-t="${k}">${v}</button>`).join("");
   $("#tabs").onclick = e => { if (e.target.dataset.t) { tab = e.target.dataset.t; render(); } };
   $("#view").innerHTML = VIEWS[tab]();
 }
@@ -201,33 +211,27 @@ const VIEWS = {
       <p><button>Uložit hru</button></p>
       <p id="zmsg" class="muted" role="status"></p></form></div>
       <div class="panel"><h2>Admin</h2>${admin()
-        ? `<p>Jsi přihlášený jako admin – v záložce Hry můžeš hry mazat 🗑.</p><button id="odhlasit">Odhlásit</button>`
+        ? `<p>Jsi přihlášený jako admin – v záložce Hry můžeš hry mazat 🗑 a v záložce 🛠 Editor upravovat web.</p><button id="odhlasit">Odhlásit</button>`
         : `<form id="af"><input type="password" id="aheslo" placeholder="Admin heslo"> <button>Přihlásit</button> <span id="amsg" class="muted" role="status"></span></form>`}</div>`;
   },
   patch() {
-    return `<div class="panel"><h2>Patch 1.2.1 · 7. 10. 2026</h2><p>Nový zápis hry.</p><ul>
-      <li>Hráče vybereš kliknutím na bubliny s jejich rank emblémem.</li>
-      <li>Pod každým vybraným hráčem je karta s políčkem na body, tlačítko 🏆 zavřel zapíše 0.</li>
-      <li>Nového hráče přidáš bublinou „+ Nový hráč“.</li></ul></div>
-      <div class="panel"><h2>Patch 1.2 · 7. 10. 2026</h2><p>Liga žolíků má vlastní web.</p><ul>
-      <li>Žebříček s rank emblémy, historie her, graf vývoje Elo a profily hráčů.</li>
-      <li>Rank up a rank down animace jako v League of Legends – přehrají se po nové hře i na kliknutí ▶ u hry.</li>
-      <li>Hry zapisuje kdokoli přímo na webu, výsledky se ukládají do tabulky.</li>
-      <li>Admin může s heslem smazat špatně zapsanou hru.</li>
-      <li>Minulá sezóna je na webu taky, stačí ji vybrat nahoře.</li></ul></div>
-      <div class="panel"><h2>Patch 1.1 · 29. 9. 2026</h2><p>Elo se nově počítá hlavně podle toho, s kolika body kdo skončí – ne jen podle toho, kdo zavřel.</p><ul>
-      <li>Body rozhodují z 80 %: každá dvojice u stolu se porovná podle rozdílu zbylých bodů.</li>
-      <li>Kdo skončí těsně za vítězem, skoro nic neztratí. Kdo zůstane s plnou rukou, ztratí nejvíc.</li>
-      <li>Zavření rozhoduje z 20 %, takže vítěz si vždycky něco připíše.</li>
-      <li>Rozdíl 150 bodů a víc se počítá jako jasná prohra.</li>
-      <li>Užší ranky: každý rank má 25 Elo (Silver od 1490, Gold od 1515, Platinum od 1540 …). Start 1500 = Silver.</li>
-      <li>K-faktor zůstává 44.</li>
-      <li>Sezóna 1 i minulá sezóna jsou přepočítané podle nových pravidel.</li></ul>
-      <p class="muted">Proč: z téměř 70 her vyšlo, že o tom, kdo zavře, rozhoduje zatím hlavně náhoda – zbylé body lépe ukazují, kdo hraje dobře.</p></div>
-      <div class="panel"><h2>Patch 1.0 · Start ligy</h2><ul>
-      <li>Elo pro stoly 3–6 hráčů: každý se porovná s každým, kdo seděl u stejného stolu.</li>
-      <li>Ranky Iron až Challenger podle League of Legends, start v Silveru (1500).</li>
-      <li>Minulá sezóna je v archivu a do aktuálního Elo se nepočítá.</li></ul></div>`;
+    return WEB.patche.map(p => `<div class="panel"><h2>${esc(p.nadpis)}</h2>${txt(p.text)}</div>`).join("");
+  },
+  editor() {
+    if (!admin()) return `<div class="panel"><p>Editor je jen pro admina.</p></div>`;
+    const b = WEB.barvy;
+    return `<div class="panel"><h2>Editor webu</h2><p class="muted">Změny vidíš hned. Pro všechny se projeví až po kliknutí na Uložit.</p>
+      <form id="ef" class="ed">
+        <label>Název webu <input name="nazev" value="${esc(WEB.nazev)}" maxlength="40"></label>
+        <fieldset><legend>Barvy</legend>${Object.entries(BARVY).map(([k, v]) => `<label><input type="color" data-barva="${k}" value="${esc(b[k])}"> ${v}</label>`).join("")}</fieldset>
+        <fieldset><legend>Patch notes</legend><p class="muted">Řádek začínající „- “ je odrážka, ostatní řádky jsou odstavce.</p>
+          ${WEB.patche.map((p, i) => `<div class="pe"><input data-pn="${i}" value="${esc(p.nadpis)}" aria-label="Nadpis patche">
+            <textarea data-pt="${i}" rows="5" aria-label="Text patche">${esc(p.text)}</textarea>
+            <div><button type="button" data-pmove="${i}" ${i ? "" : "disabled"}>↑ výš</button> <button type="button" data-pdel="${i}">Smazat patch</button></div></div>`).join("")}
+          <button type="button" id="padd">+ Nový patch nahoru</button></fieldset>
+        <fieldset><legend>Vlastní CSS</legend><textarea name="css" rows="8" spellcheck="false" placeholder="např. h1 { color: hotpink }">${esc(WEB.css)}</textarea></fieldset>
+        <p><button>Uložit pro všechny</button> <button type="button" id="ereset">Vrátit výchozí</button> <span id="emsg" class="muted" role="status"></span></p>
+      </form></div>`;
   },
   pravidla() {
     const s = D.settings;
@@ -307,6 +311,62 @@ document.addEventListener("click", e => {
   }
   const w = e.target.closest("[data-win]");
   if (w) $("#sel").querySelector(`input[name="${CSS.escape(w.dataset.win)}"]`).value = 0;
+});
+
+// --- editor webu (jen admin) ---
+// Nastavení webu je uložené jako JSON v listu Web (buňka A1); zapisuje ho skript s admin heslem.
+const BARVY = { bg: "Pozadí", panel: "Panely", gold: "Rámečky a zlatá", gold2: "Nadpisy", text: "Text", up: "Zisk / povýšení", down: "Ztráta / sestup" };
+const DEFAULT_WEB = {
+  nazev: "Liga žolíků",
+  barvy: { bg: "#010a13", panel: "#0a1428", gold: "#c8aa6e", gold2: "#f0e6d2", text: "#cdbe91", up: "#0acbe6", down: "#e84057" },
+  css: "",
+  patche: [
+    { nadpis: "Patch 2.2 · 7. 10. 2026", text: "Editor webu pro admina.\n- Po přihlášení adminem se objeví záložka 🛠 Editor.\n- Admin v ní mění název webu, barvy, patch notes a může přidat vlastní CSS.\n- Změny se ukládají do tabulky a uvidí je všichni." },
+    { nadpis: "Patch 2.1 · 7. 10. 2026", text: "Nový zápis hry.\n- Hráče vybereš kliknutím na bubliny s jejich rank emblémem.\n- Pod každým vybraným hráčem je karta s políčkem na body, tlačítko 🏆 zavřel zapíše 0.\n- Nového hráče přidáš bublinou „+ Nový hráč“." },
+    { nadpis: "Update 2.0 · 7. 10. 2026", text: "Liga žolíků má vlastní web.\n- Žebříček s rank emblémy, historie her, graf vývoje Elo a profily hráčů.\n- Rank up a rank down animace jako v League of Legends – přehrají se po nové hře i na kliknutí ▶ u hry.\n- Hry zapisuje kdokoli přímo na webu, výsledky se ukládají do tabulky.\n- Admin může s heslem smazat špatně zapsanou hru.\n- Minulá sezóna je na webu taky, stačí ji vybrat nahoře." },
+    { nadpis: "Patch 1.1 · 29. 9. 2026", text: "Elo se nově počítá hlavně podle toho, s kolika body kdo skončí – ne jen podle toho, kdo zavřel.\n- Body rozhodují z 80 %: každá dvojice u stolu se porovná podle rozdílu zbylých bodů.\n- Kdo skončí těsně za vítězem, skoro nic neztratí. Kdo zůstane s plnou rukou, ztratí nejvíc.\n- Zavření rozhoduje z 20 %, takže vítěz si vždycky něco připíše.\n- Rozdíl 150 bodů a víc se počítá jako jasná prohra.\n- Užší ranky: každý rank má 25 Elo (Silver od 1490, Gold od 1515, Platinum od 1540 …). Start 1500 = Silver.\n- K-faktor zůstává 44.\n- Sezóna 1 i minulá sezóna jsou přepočítané podle nových pravidel.\nProč: z téměř 70 her vyšlo, že o tom, kdo zavře, rozhoduje zatím hlavně náhoda – zbylé body lépe ukazují, kdo hraje dobře." },
+    { nadpis: "Patch 1.0 · Start ligy", text: "- Elo pro stoly 3–6 hráčů: každý se porovná s každým, kdo seděl u stejného stolu.\n- Ranky Iron až Challenger podle League of Legends, start v Silveru (1500).\n- Minulá sezóna je v archivu a do aktuálního Elo se nepočítá." }
+  ]
+};
+const WEB = structuredClone(DEFAULT_WEB);
+function txt(t) {
+  return t.split("\n").map(l => l.startsWith("- ") ? `<li>${esc(l.slice(2))}</li>` : l.trim() ? `<p>${esc(l)}</p>` : "").join("")
+    .replace(/(<li>.*?<\/li>)+/g, m => `<ul>${m}</ul>`);
+}
+function applyWeb() {
+  for (const [k, v] of Object.entries(WEB.barvy)) document.documentElement.style.setProperty("--" + k, v);
+  $("h1").textContent = "🃏 " + WEB.nazev;
+  document.title = WEB.nazev;
+  ($("#customcss") || document.head.appendChild(Object.assign(document.createElement("style"), { id: "customcss" }))).textContent = WEB.css;
+}
+document.addEventListener("input", e => {
+  const t = e.target;
+  if (!t.closest("#ef")) return;
+  if (t.name === "nazev") WEB.nazev = t.value;
+  else if (t.name === "css") WEB.css = t.value;
+  else if (t.dataset.barva) WEB.barvy[t.dataset.barva] = t.value;
+  else if (t.dataset.pn) WEB.patche[t.dataset.pn].nadpis = t.value;
+  else if (t.dataset.pt) WEB.patche[t.dataset.pt].text = t.value;
+  applyWeb();
+});
+document.addEventListener("click", e => {
+  const t = e.target;
+  if (!t.closest("#ef")) return;
+  if (t.id === "padd") WEB.patche.unshift({ nadpis: "Patch ? · " + new Date().toLocaleDateString("cs-CZ"), text: "- " });
+  else if (t.dataset.pdel) { if (!confirm("Smazat tento patch?")) return; WEB.patche.splice(+t.dataset.pdel, 1); }
+  else if (t.dataset.pmove) { const i = +t.dataset.pmove; [WEB.patche[i - 1], WEB.patche[i]] = [WEB.patche[i], WEB.patche[i - 1]]; }
+  else if (t.id === "ereset") { if (!confirm("Vrátit výchozí vzhled a texty? (Uloží se až tlačítkem Uložit.)")) return; Object.assign(WEB, structuredClone(DEFAULT_WEB)); applyWeb(); }
+  else return;
+  render();
+});
+document.addEventListener("submit", async e => {
+  if (e.target.id !== "ef") return;
+  e.preventDefault();
+  $("#emsg").textContent = "Ukládám…";
+  try {
+    const r = await post({ akce: "web", heslo: admin(), web: WEB });
+    $("#emsg").textContent = r.ok ? "Uloženo ✓" : (r.chyba || "Uložení selhalo.");
+  } catch (err) { $("#emsg").textContent = "Nepodařilo se spojit s tabulkou: " + err.message; }
 });
 
 // --- admin: mazání her ---
