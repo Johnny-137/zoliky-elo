@@ -27,6 +27,12 @@ function doPost(e) {
       sh.getRange(3, 2, rows.length + 1, cols.length).setValues(rows.concat([cols.map(() => "")]));
       return out({ ok: true });
     }
+    const chyba = zkontroluj(d.hra, cols);
+    if (chyba) return out({ ok: false, chyba });
+    // Proti spamu: nejvýš 20 zápisů za hodinu.
+    const cache = CacheService.getScriptCache(), n = Number(cache.get("zapisy") || 0);
+    if (n >= 20) return out({ ok: false, chyba: "Příliš mnoho zápisů, zkus to za hodinu" });
+    cache.put("zapisy", String(n + 1), 3600);
     for (const p in d.hra) if (!cols.includes(p)) { sh.getRange(2, 2 + cols.length).setValue(p); cols.push(p); }
     const rows = rng().getValues();
     const r = rows.findIndex(row => row.every(v => v === ""));
@@ -36,6 +42,20 @@ function doPost(e) {
   } finally {
     lock.releaseLock();
   }
+}
+
+// Web kontroluje totéž, ale ten jde obejít – tady je pravidlo, které platí vždycky.
+function zkontroluj(hra, cols) {
+  if (!hra || typeof hra !== "object" || Array.isArray(hra)) return "Chybí hra";
+  const ps = Object.keys(hra), body = Object.values(hra);
+  if (ps.length < 2 || ps.length > 6) return "Hru hrají 2–6 hráči";
+  if (!body.every(b => Number.isInteger(b) && b >= 0 && b <= 999)) return "Body musí být celá čísla 0–999";
+  if (!body.includes(0)) return "Někdo musí zavřít (0 bodů)";
+  const nove = ps.filter(p => !cols.includes(p));
+  if (nove.length > 1) return "V jedné hře může být nejvýš 1 nový hráč";
+  if (nove.some(p => !/^[\p{L}\p{N}][\p{L}\p{N} ._-]{0,19}$/u.test(p) || p.trim() !== p)) return "Jméno: jen písmena, čísla a mezery, max 20 znaků";
+  if (cols.length + nove.length > 50) return "Hráčů je už moc";
+  return "";
 }
 
 function out(o) {
