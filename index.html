@@ -63,8 +63,14 @@ td{padding:8px 6px;border-top:1px solid #1e2328}
 .hgrid{margin-bottom:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
 .hgrid .panel{margin:0}
 .hcard{border-top:3px solid var(--c)}
-.hstat th{text-transform:none;font-size:.85rem}
-.hstat td .emb{width:22px;height:22px;vertical-align:middle}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.tile{background:#010a13;border:1px solid var(--line);padding:14px;display:grid;gap:8px;align-content:start}
+.tl{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.tv{display:flex;justify-content:space-between;align-items:center;gap:8px;border-left:3px solid var(--c);padding-left:8px}
+.tv span{color:var(--c);font-size:.85rem}
+.tv b{color:var(--gold2);font-size:1.2rem;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.tv .emb{width:26px;height:26px}
+@media(max-width:600px){.tiles{grid-template-columns:1fr}}
 .win:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
 .card.vitez{border-color:var(--up);box-shadow:0 0 12px var(--up)}
 .card.vitez .win{border-color:var(--up);color:var(--up)}
@@ -241,7 +247,8 @@ const VIEWS = {
     const all = S[cur.id].table.map(x => x.p);
     cmp = cmp.filter(p => all.includes(p));
     const ps = cmp.map(pstats);
-    const row = (label, f) => `<tr><th>${label}</th>${ps.map(x => `<td class="num">${f(x)}</td>`).join("")}</tr>`;
+    // Jedna dlaždice = jedna statistika, uvnitř hodnota pro každého vybraného hráče (barva = jeho čára v grafu).
+    const row = (label, f) => `<div class="tile"><div class="tl">${label}</div>${ps.map((x, j) => `<div class="tv" style="--c:${LINE[j % LINE.length]}">${cmp.length > 1 ? `<span>${esc(x.p)}</span>` : ""}<b>${f(x)}</b></div>`).join("")}</div>`;
     return `<div class="panel"><h2>Hráči <span class="muted">· náhled (jen vývojářský režim)</span></h2>
       <p><input id="hsearch" list="hlist" placeholder="🔍 Najdi hráče…" autocomplete="off" aria-label="Najdi hráče"><datalist id="hlist">${all.filter(p => !cmp.includes(p)).map(p => `<option value="${esc(p)}">`).join("")}</datalist>
       ${cmp.map((p, j) => `<button type="button" class="hchip" style="--c:${LINE[j % LINE.length]}" data-hdel="${esc(p)}" aria-label="Odebrat ${esc(p)}">${esc(p)} ✕</button>`).join("")}</p>
@@ -250,7 +257,7 @@ const VIEWS = {
         <div class="player" style="cursor:auto">${emblem(x.rank, "emb\" style=\"width:64px;height:64px")}<div><h2 style="margin:0">${esc(x.p)}</h2><div class="rk">${x.rank} · <b>${fmt(x.elo)}</b> Elo</div></div></div>
         <div class="stats"><div><b>${x.winrate}%</b>winrate</div><div><b>${x.games}</b>her</div><div><b>${x.wins}</b>výher</div><div><b>${x.avg}</b>Ø trestné body</div><div><b>${x.pts}</b>body celkem</div><div><b>${x.pos}.</b>v žebříčku</div></div></div>`).join("")}</div>
       <div class="panel"><h2>Vývoj Elo</h2>${chart(S[cur.id].hist, cmp, 1000, 420)}</div>
-      <div class="panel"><h2>Statistiky</h2><table class="hstat"><tr><th></th>${ps.map((x, j) => `<th class="num" style="color:${LINE[j % LINE.length]}">${esc(x.p)}</th>`).join("")}</tr>
+      <div class="panel"><h2>Statistiky</h2><div class="tiles">
         ${row("Peak", x => `${emblem(x.peakRank)} ${x.peakRank} · ${fmt(x.max)}`)}
         ${row("Bottom", x => `${emblem(x.bottomRank)} ${x.bottomRank} · ${fmt(x.min)}`)}
         ${row("Nejdelší série výher", x => x.bestStreak)}
@@ -261,7 +268,7 @@ const VIEWS = {
         ${row("Nejlepší hra (nejméně bodů mimo výhru)", x => x.bestNonWin)}
         ${row("Nejhorší hra (nejvíc bodů)", x => x.worstGame)}
         ${row("Nejčastější soupeř", x => x.rival)}
-      </table></div>` : ""}`;
+      </div></div>` : ""}`;
   },
   editor() {
     if (!admin()) return `<div class="panel"><p>Editor je jen pro admina.</p></div>`;
