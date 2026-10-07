@@ -61,8 +61,7 @@ td{padding:8px 6px;border-top:1px solid #1e2328}
 .card.vitez{border-color:var(--up);box-shadow:0 0 12px var(--up)}
 .card.vitez .win{border-color:var(--up);color:var(--up)}
 .card input:disabled{opacity:.7}
-.chart{position:relative}
-.replay{position:absolute;right:0;top:-38px;font-size:.8rem}
+
 dialog{background:var(--panel);color:var(--text);border:1px solid var(--gold);max-width:520px;width:calc(100% - 32px);padding:18px}
 dialog::backdrop{background:#000a}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
@@ -267,9 +266,8 @@ function chart(hist, players, w = 900, h = 320) {
     return `<polyline fill="none" stroke="${LINE[j % LINE.length]}" stroke-width="2" points="${pts.map(([i, v]) => X(i) + "," + Y(v)).join(" ")}"/>`;
   }).join("");
   const id = "c" + Math.random().toString(36).slice(2);
-  // Čáry se odkrývají zleva doprava, jak šly hry po sobě; ▶ přehraje znovu.
-  return `<div class="chart"><button type="button" class="replay" data-replay="${id}" aria-label="Přehrát vývoj znovu">▶ Přehrát</button>
-    <svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto"><defs><clipPath id="${id}"><rect x="0" y="0" height="${h}" width="0"><animate attributeName="width" from="30" to="${w}" dur="${Math.min(6, 1 + n / 20)}s" fill="freeze" calcMode="spline" keySplines=".4 0 .2 1" keyTimes="0;1"/></rect></clipPath></defs>
+  // Čáry se odkrývají zleva doprava, jak šly hry po sobě; kliknutí na graf to přehraje znovu.
+  return `<div class="chart"><svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;cursor:pointer" data-replay="${id}" role="img" aria-label="Vývoj Elo, klikni pro přehrání"><defs><clipPath id="${id}"><rect x="0" y="0" height="${h}" width="0"><animate attributeName="width" from="30" to="${w}" dur="${Math.min(6, 1 + n / 20)}s" fill="freeze" calcMode="spline" keySplines=".4 0 .2 1" keyTimes="0;1"/></rect></clipPath></defs>
     ${grid}<g clip-path="url(#${id})">${lines}</g><text x="30" y="${h - 4}" fill="#7b7a6e" font-size="11">hra 0</text><text x="${w - 10}" y="${h - 4}" fill="#7b7a6e" font-size="11" text-anchor="end">hra ${n}</text></svg></div>
     <div class="legend">${players.map((p, j) => `<span style="--c:${LINE[j % LINE.length]}" data-p="${esc(p)}">${esc(p)}</span>`).join("")}</div>`;
 }
@@ -340,7 +338,7 @@ const DEFAULT_WEB = {
   barvy: { bg: "#010a13", panel: "#0a1428", gold: "#c8aa6e", gold2: "#f0e6d2", text: "#cdbe91", up: "#0acbe6", down: "#e84057" },
   css: "",
   patche: [
-    { nadpis: "Patch 2.3 · 7. 10. 2026", text: "Zápis a grafy.\n- Body se píšou jen čísly, bez šipek nahoru a dolů.\n- Vítěze označíš tlačítkem 🏆 vítěz: dostane 0 bodů a ostatním se tlačítko zašedí.\n- Grafy Elo se při otevření postupně vykreslí hru po hře, ▶ Přehrát to pustí znovu.\n- Nové hry mají u sebe datum a čas zápisu." },
+    { nadpis: "Patch 2.3 · 7. 10. 2026", text: "Zápis a grafy.\n- Body se píšou jen čísly, bez šipek nahoru a dolů.\n- Vítěze označíš tlačítkem 🏆 vítěz: dostane 0 bodů a ostatním se tlačítko zašedí.\n- Grafy Elo se při otevření postupně vykreslí hru po hře, kliknutím na graf se animace pustí znovu.\n- Nové hry mají u sebe datum a čas zápisu." },
     { nadpis: "Patch 2.2 · 7. 10. 2026", text: "Editor webu pro admina.\n- Po přihlášení adminem se objeví záložka 🛠 Editor.\n- Admin v ní mění název webu, barvy, patch notes a může přidat vlastní CSS.\n- Změny se ukládají do tabulky a uvidí je všichni." },
     { nadpis: "Patch 2.1 · 7. 10. 2026", text: "Nový zápis hry.\n- Hráče vybereš kliknutím na bubliny s jejich rank emblémem.\n- Pod každým vybraným hráčem je karta s políčkem na body, tlačítko 🏆 zavřel zapíše 0.\n- Nového hráče přidáš bublinou „+ Nový hráč“." },
     { nadpis: "Update 2.0 · 7. 10. 2026", text: "Liga žolíků má vlastní web.\n- Žebříček s rank emblémy, historie her, graf vývoje Elo a profily hráčů.\n- Rank up a rank down animace jako v League of Legends – přehrají se po nové hře i na kliknutí ▶ u hry.\n- Hry zapisuje kdokoli přímo na webu, výsledky se ukládají do tabulky.\n- Admin může s heslem smazat špatně zapsanou hru.\n- Minulá sezóna je na webu taky, stačí ji vybrat nahoře." },
