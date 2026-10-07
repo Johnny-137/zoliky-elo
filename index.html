@@ -124,14 +124,14 @@ dialog::backdrop{background:#000a}
 <body>
 <header>
   <h1>🃏 Liga žolíků</h1>
-  <select id="season" aria-label="Sezóna"></select>
+  <div><span id="ver" class="muted"></span> <select id="season" aria-label="Sezóna"></select></div>
 </header>
 <nav id="tabs"></nav>
 <main id="view"></main>
 <dialog id="profile"></dialog>
 <div id="fx" title="Klikni pro pokračování"></div>
 
-<script src="elo.js"></script>
+<script src="elo.js?v=2.4"></script>
 <script>
 // Hry aktuální sezóny se čtou živě z Google tabulky (list Hry); když to nejde, použije se kopie v data.json.
 // Adresa webové aplikace z Apps Scriptu (zapis.gs) – přes ni web zapisuje nové hry do tabulky.
@@ -184,8 +184,24 @@ async function live() {
   return { players, games, times: times.every(t => !t || /^\d{4}-\d\d-\d\dT/.test(t)) ? times : [] };
 }
 
+// Verze webu: při vydání patche změň VERSION i version.json. Když prohlížeč drží starou verzi
+// (GitHub Pages ji cachuje ~10 min), stáhne novou a stránku jednou obnoví.
+const VERSION = "2.4";
+async function ensureFresh() {
+  try {
+    const { v } = await fetch("version.json", { cache: "no-store" }).then(r => r.json());
+    if (v === VERSION || sessionStorage.getItem("zoliky-reload") === v) return;
+    sessionStorage.setItem("zoliky-reload", v);
+    await Promise.all([location.pathname, "elo.js", "data.json"].map(u => fetch(u, { cache: "reload" })));
+    location.reload();
+    await new Promise(() => {}); // stránka se obnovuje
+  } catch {}
+}
+
 async function init() {
-  D = await fetch("data.json").then(r => r.json());
+  await ensureFresh();
+  $("#ver").textContent = "patch " + VERSION;
+  D = await fetch("data.json", { cache: "no-cache" }).then(r => r.json());
   let src = "uložená kopie";
   try { Object.assign(D.seasons[0], await live()); src = "živě z Google tabulky"; } catch (e) { console.warn("Tabulka nedostupná, beru data.json", e); }
   D.src = src;
