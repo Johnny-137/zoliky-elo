@@ -131,7 +131,7 @@ dialog::backdrop{background:#000a}
 <dialog id="profile"></dialog>
 <div id="fx" title="Klikni pro pokračování"></div>
 
-<script src="elo.js?v=2.4"></script>
+<script src="elo.js?v=2.4.1"></script>
 <script>
 // Hry aktuální sezóny se čtou živě z Google tabulky (list Hry); když to nejde, použije se kopie v data.json.
 // Adresa webové aplikace z Apps Scriptu (zapis.gs) – přes ni web zapisuje nové hry do tabulky.
@@ -186,7 +186,7 @@ async function live() {
 
 // Verze webu: při vydání patche změň VERSION i version.json. Když prohlížeč drží starou verzi
 // (GitHub Pages ji cachuje ~10 min), stáhne novou a stránku jednou obnoví.
-const VERSION = "2.4";
+const VERSION = "2.4.1";
 async function ensureFresh() {
   try {
     const { v } = await fetch("version.json", { cache: "no-store" }).then(r => r.json());
@@ -259,6 +259,8 @@ const VIEWS = {
   zapis() {
     const s = D.seasons[0];
     if (!SCRIPT_URL) return `<div class="panel"><h2>Zápis hry</h2><p>Zápis ještě není propojený s tabulkou (chybí adresa Apps Scriptu).</p></div>`;
+    // Starší sezóny jsou archiv – zapisovat jde jen do aktuální.
+    if (cur !== s) return `<div class="panel"><h2>Zápis hry</h2><p>🔒 ${esc(cur.name)} je uzavřený archiv, do ní se už hry nezapisují.</p><button type="button" id="tocur">Přepnout na ${esc(s.name)}</button></div>`;
     winner = null;
     const known = S[s.id].table.map(x => x.p).concat(s.players.filter(p => !S[s.id].st[p].games));
     return `<div class="panel"><h2>Zápis hry · ${esc(s.name)} #${S[s.id].hist.length + 1}</h2>
@@ -444,6 +446,7 @@ document.addEventListener("input", e => {
   if (e.target.value === "0" && !winner) { winner = e.target.name; cards(); }
 });
 document.addEventListener("change", e => { if (e.target.closest("#bubs")) cards(); });
+document.addEventListener("click", e => { if (e.target.id === "tocur") { cur = D.seasons[0]; $("#season").value = cur.id; render(); } });
 document.addEventListener("click", e => {
   if (e.target.id === "novy") {
     const p = (prompt("Jméno nového hráče:") || "").trim();
@@ -464,6 +467,7 @@ const DEFAULT_WEB = {
   barvy: { bg: "#010a13", panel: "#0a1428", gold: "#c8aa6e", gold2: "#f0e6d2", text: "#cdbe91", up: "#0acbe6", down: "#e84057" },
   css: "",
   patche: [
+    { nadpis: "Patch 2.4.1 · 7. 10. 2026", text: "- Minulá sezóna je zamčená: když ji máš vybranou, Zápis hry ukáže jen odkaz na aktuální sezónu.\n- Web si sám stáhne nejnovější patch, vpravo nahoře je vidět, jaký patch běží." },
     { nadpis: "Patch 2.4 · 7. 10. 2026", text: "Nová záložka Hráči a plná podpora mobilu.\n- Záložka Hráči: najdeš hráče přes políčko Hledat (nevadí diakritika ani velká písmena).\n- U hráče uvidíš rank, Elo, winrate, hry, výhry a trestné body jako dlaždice, pod tím velký animovaný graf Elo.\n- Další statistiky: peak a bottom rank, nejdelší série výher, forma za posledních 5 her, největší zisk a ztráta Elo, nejlepší a nejhorší hra a nejčastější soupeř.\n- Porovnání: přidej víc hráčů a jejich grafy se překryjí, statistiky budou vedle sebe.\n- Zápis hry: kdo napíše 0, je hned označený jako vítěz.\n- Mobil: záložky se zalamují, grafy jsou čitelné a dlaždice jsou pod sebou." },
     { nadpis: "Patch 2.3 · 7. 10. 2026", text: "Zápis a grafy.\n- Body se píšou jen čísly, bez šipek nahoru a dolů.\n- Vítěze označíš tlačítkem 🏆 vítěz: dostane 0 bodů a ostatním se tlačítko zašedí.\n- Grafy Elo se při otevření postupně vykreslí hru po hře, kliknutím na graf se animace pustí znovu.\n- Nové hry mají u sebe datum a čas zápisu." },
     { nadpis: "Patch 2.2 · 7. 10. 2026", text: "Editor webu pro admina.\n- Po přihlášení adminem se objeví záložka 🛠 Editor.\n- Admin v ní mění název webu, barvy, patch notes a může přidat vlastní CSS.\n- Změny se ukládají do tabulky a uvidí je všichni." },
