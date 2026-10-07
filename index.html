@@ -205,7 +205,17 @@ const VIEWS = {
         : `<form id="af"><input type="password" id="aheslo" placeholder="Admin heslo"> <button>Přihlásit</button> <span id="amsg" class="muted" role="status"></span></form>`}</div>`;
   },
   patch() {
-    return `<div class="panel"><h2>Patch 1.1 · 29. 9. 2026</h2><p>Elo se nově počítá hlavně podle toho, s kolika body kdo skončí – ne jen podle toho, kdo zavřel.</p><ul>
+    return `<div class="panel"><h2>Patch 1.2.1 · 7. 10. 2026</h2><p>Nový zápis hry.</p><ul>
+      <li>Hráče vybereš kliknutím na bubliny s jejich rank emblémem.</li>
+      <li>Pod každým vybraným hráčem je karta s políčkem na body, tlačítko 🏆 zavřel zapíše 0.</li>
+      <li>Nového hráče přidáš bublinou „+ Nový hráč“.</li></ul></div>
+      <div class="panel"><h2>Patch 1.2 · 7. 10. 2026</h2><p>Liga žolíků má vlastní web.</p><ul>
+      <li>Žebříček s rank emblémy, historie her, graf vývoje Elo a profily hráčů.</li>
+      <li>Rank up a rank down animace jako v League of Legends – přehrají se po nové hře i na kliknutí ▶ u hry.</li>
+      <li>Hry zapisuje kdokoli přímo na webu, výsledky se ukládají do tabulky.</li>
+      <li>Admin může s heslem smazat špatně zapsanou hru.</li>
+      <li>Minulá sezóna je na webu taky, stačí ji vybrat nahoře.</li></ul></div>
+      <div class="panel"><h2>Patch 1.1 · 29. 9. 2026</h2><p>Elo se nově počítá hlavně podle toho, s kolika body kdo skončí – ne jen podle toho, kdo zavřel.</p><ul>
       <li>Body rozhodují z 80 %: každá dvojice u stolu se porovná podle rozdílu zbylých bodů.</li>
       <li>Kdo skončí těsně za vítězem, skoro nic neztratí. Kdo zůstane s plnou rukou, ztratí nejvíc.</li>
       <li>Zavření rozhoduje z 20 %, takže vítěz si vždycky něco připíše.</li>
@@ -221,7 +231,7 @@ const VIEWS = {
   },
   pravidla() {
     const s = D.settings;
-    return `<div class="panel"><h2>Pravidla (patch 1.1)</h2><ul>
+    return `<div class="panel"><h2>Pravidla (patch 1.2.1)</h2><ul>
       <li>Každý hráč se porovná s každým, kdo seděl u stejného stolu.</li>
       <li>Body rozhodují z ${Math.round(100 * (1 - s.closeWeight))} %: rozdíl zbylých bodů ve dvojici, ${s.clearLoss}+ = jasná prohra.</li>
       <li>Zavření rozhoduje z ${Math.round(100 * s.closeWeight)} %.</li>
