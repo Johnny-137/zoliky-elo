@@ -33,6 +33,7 @@ function doPost(e) {
       const i = d.cislo - 1;
       if (!(i >= 0 && i < rows.length)) return out({ ok: false, chyba: "Hra neexistuje" });
       rows.splice(i, 1);
+      casy().deleteRow(i + 1);
       sh.getRange(3, 2, rows.length + 1, cols.length).setValues(rows.concat([cols.map(() => "")]));
       return out({ ok: true });
     }
@@ -47,10 +48,17 @@ function doPost(e) {
     const r = rows.findIndex(row => row.every(v => v === ""));
     if (r < 0) return out({ ok: false, chyba: "List Hry je plný" });
     sh.getRange(3 + r, 2, 1, cols.length).setValues([cols.map(p => p in d.hra ? Number(d.hra[p]) : "")]);
+    casy().getRange(r + 1, 1).setNumberFormat("@").setValue(new Date().toISOString());
     return out({ ok: true, hra: r + 1 });
   } finally {
     lock.releaseLock();
   }
+}
+
+// List Casy: v řádku N je čas zápisu hry č. N (starší hry čas nemají).
+function casy() {
+  const ss = SpreadsheetApp.getActive();
+  return ss.getSheetByName("Casy") || ss.insertSheet("Casy");
 }
 
 // Web kontroluje totéž, ale ten jde obejít – tady je pravidlo, které platí vždycky.

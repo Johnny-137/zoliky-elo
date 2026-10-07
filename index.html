@@ -57,6 +57,12 @@ td{padding:8px 6px;border-top:1px solid #1e2328}
 .card b{color:var(--gold2)}
 .card input{width:100%;font-size:1.3rem;text-align:center}
 .win{font-size:.8rem}
+.win:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
+.card.vitez{border-color:var(--up);box-shadow:0 0 12px var(--up)}
+.card.vitez .win{border-color:var(--up);color:var(--up)}
+.card input:disabled{opacity:.7}
+.chart{position:relative}
+.replay{position:absolute;right:0;top:-38px;font-size:.8rem}
 dialog{background:var(--panel);color:var(--text);border:1px solid var(--gold);max-width:520px;width:calc(100% - 32px);padding:18px}
 dialog::backdrop{background:#000a}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
@@ -145,7 +151,9 @@ async function live() {
     const g = {}; players.forEach((p, i) => { if (r[i + 1] !== undefined && r[i + 1] !== "") g[p] = +r[i + 1]; }); return g;
   }).filter(g => Object.keys(g).length >= 2);
   if (!players.length || !games.length) throw new Error("prázdná data");
-  return { players, games };
+  // Časy zápisu (list Casy, řádek = číslo hry); starší hry čas nemají.
+  const times = await fetch(SHEET.replace("sheet=Hry", "sheet=Casy") + "A1:A1000").then(x => x.text()).then(t => csv(t).map(r => r[0])).catch(() => []);
+  return { players, games, times: times.every(t => !t || /^\d{4}-\d\d-\d\dT/.test(t)) ? times : [] };
 }
 
 async function init() {
@@ -172,6 +180,7 @@ function render() {
   $("#view").innerHTML = VIEWS[tab]();
 }
 const name = p => `<span class="player" data-p="${esc(p)}">${esc(p)}</span>`;
+document.addEventListener("click", e => { const r = e.target.closest("[data-replay]"); if (r) document.querySelector(`#${r.dataset.replay} animate`).beginElement(); });
 document.addEventListener("click", e => { const p = e.target.closest("[data-p]"); if (p) openProfile(p.dataset.p); const g = e.target.closest("[data-play]"); if (g) playGame(+g.dataset.play); });
 
 const VIEWS = {
@@ -190,7 +199,8 @@ const VIEWS = {
     return `<div class="panel"><h2>Hry</h2><p class="muted">0 = zavřel. U her se změnou ranku můžeš animaci přehrát ▶.</p>${hist.map((h, i) => {
       const ps = Object.entries(h.game).sort((a, b) => a[1] - b[1]);
       const changed = ps.some(([p]) => rank(h.before[p]) !== rank(h.after[p]));
-      return `<div class="game"><b>#${i + 1}</b>${ps.map(([p, v]) => { const d = fmt(h.after[p]) - fmt(h.before[p]);
+      const t = cur.times?.[i] && new Date(cur.times[i]);
+      return `<div class="game"><b>#${i + 1}</b>${t && !isNaN(t) ? `<span class="muted">${t.toLocaleString("cs-CZ", { day: "numeric", month: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>` : ""}${ps.map(([p, v]) => { const d = fmt(h.after[p]) - fmt(h.before[p]);
         const rc = rank(h.after[p]) !== rank(h.before[p]) ? (tier(rank(h.after[p])) > tier(rank(h.before[p])) ? " ⬆" : " ⬇") : "";
         return `<span class="chip">${name(p)} ${v === 0 ? "🏆" : v} <span class="${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}${rc}</span></span>`; }).join("")}
         ${changed ? `<button data-play="${i}" aria-label="Přehrát animaci">▶</button>` : ""}
@@ -203,6 +213,7 @@ const VIEWS = {
   zapis() {
     const s = D.seasons[0];
     if (!SCRIPT_URL) return `<div class="panel"><h2>Zápis hry</h2><p>Zápis ještě není propojený s tabulkou (chybí adresa Apps Scriptu).</p></div>`;
+    winner = null;
     const known = S[s.id].table.map(x => x.p).concat(s.players.filter(p => !S[s.id].st[p].games));
     return `<div class="panel"><h2>Zápis hry · ${esc(s.name)} #${S[s.id].hist.length + 1}</h2>
       <p class="muted">1. Klikni na hráče, kteří hráli. 2. Pod každého napiš trestné body (kdo zavřel, má 0).</p>
@@ -255,7 +266,11 @@ function chart(hist, players, w = 900, h = 320) {
     const pts = [[0, D.settings.start]]; hist.forEach((x, i) => { if (p in x.game) pts.push([i + 1, x.after[p]]); });
     return `<polyline fill="none" stroke="${LINE[j % LINE.length]}" stroke-width="2" points="${pts.map(([i, v]) => X(i) + "," + Y(v)).join(" ")}"/>`;
   }).join("");
-  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto">${grid}${lines}<text x="30" y="${h - 4}" fill="#7b7a6e" font-size="11">hra 0</text><text x="${w - 10}" y="${h - 4}" fill="#7b7a6e" font-size="11" text-anchor="end">hra ${n}</text></svg>
+  const id = "c" + Math.random().toString(36).slice(2);
+  // Čáry se odkrývají zleva doprava, jak šly hry po sobě; ▶ přehraje znovu.
+  return `<div class="chart"><button type="button" class="replay" data-replay="${id}" aria-label="Přehrát vývoj znovu">▶ Přehrát</button>
+    <svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto"><defs><clipPath id="${id}"><rect x="0" y="0" height="${h}" width="0"><animate attributeName="width" from="30" to="${w}" dur="${Math.min(6, 1 + n / 20)}s" fill="freeze" calcMode="spline" keySplines=".4 0 .2 1" keyTimes="0;1"/></rect></clipPath></defs>
+    ${grid}<g clip-path="url(#${id})">${lines}</g><text x="30" y="${h - 4}" fill="#7b7a6e" font-size="11">hra 0</text><text x="${w - 10}" y="${h - 4}" fill="#7b7a6e" font-size="11" text-anchor="end">hra ${n}</text></svg></div>
     <div class="legend">${players.map((p, j) => `<span style="--c:${LINE[j % LINE.length]}" data-p="${esc(p)}">${esc(p)}</span>`).join("")}</div>`;
 }
 
@@ -286,20 +301,24 @@ document.addEventListener("submit", async e => {
     const r = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ heslo: ZAPIS_HESLO, hra }) }).then(x => x.json());
     if (!r.ok) return msg.textContent = r.chyba || "Uložení selhalo.";
     // když tabulka ještě nestihla, přidej hru lokálně
-    await reload(s => { s.games.push(hra); if (novy) s.players.push(novy); });
+    await reload(s => { s.games.push(hra); (s.times ||= [])[s.games.length - 1] = new Date().toISOString(); if (novy) s.players.push(novy); });
     autoPlay();
   } catch (err) { msg.textContent = "Nepodařilo se spojit s tabulkou: " + err.message; }
 });
 
 // --- zápis: bubliny hráčů ---
 const bubble = p => `<label class="bub"><input type="checkbox" value="${esc(p)}"><span>${emblem(rank(S[D.seasons[0].id].st[p]?.elo ?? D.settings.start))}${esc(p)}</span></label>`;
+let winner = null;
 function cards() {
-  const vals = {};
+  const vals = {}, picked = [...$("#bubs").querySelectorAll("input:checked")].map(c => c.value);
   $("#sel").querySelectorAll("input").forEach(i => vals[i.name] = i.value);
-  $("#sel").innerHTML = [...$("#bubs").querySelectorAll("input:checked")].map(c => `<div class="card"><b>${esc(c.value)}</b>
-    <input type="number" min="0" max="999" step="1" inputmode="numeric" name="${esc(c.value)}" value="${esc(vals[c.value] ?? "")}" placeholder="body" aria-label="Body ${esc(c.value)}">
-    <button type="button" class="win" data-win="${esc(c.value)}">🏆 zavřel</button></div>`).join("");
+  if (!picked.includes(winner)) winner = null;
+  $("#sel").innerHTML = picked.map(p => { const w = p === winner; return `<div class="card${w ? " vitez" : ""}"><b>${esc(p)}</b>
+    <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off" name="${esc(p)}" value="${w ? 0 : esc(vals[p] ?? "")}" placeholder="body" aria-label="Body ${esc(p)}" ${w ? "disabled" : ""}>
+    <button type="button" class="win" data-win="${esc(p)}" ${winner && !w ? "disabled" : ""} aria-pressed="${w}">🏆 ${w ? "vítěz ✓" : "vítěz"}</button></div>`; }).join("");
 }
+// do políček s body jdou napsat jen číslice
+document.addEventListener("input", e => { if (e.target.closest("#sel")) e.target.value = e.target.value.replace(/\D/g, ""); });
 document.addEventListener("change", e => { if (e.target.closest("#bubs")) cards(); });
 document.addEventListener("click", e => {
   if (e.target.id === "novy") {
@@ -310,7 +329,7 @@ document.addEventListener("click", e => {
     cards();
   }
   const w = e.target.closest("[data-win]");
-  if (w) $("#sel").querySelector(`input[name="${CSS.escape(w.dataset.win)}"]`).value = 0;
+  if (w) { const p = w.dataset.win; if (winner === p) $("#sel").querySelector(`input[name="${CSS.escape(p)}"]`).value = ""; winner = winner === p ? null : p; cards(); }
 });
 
 // --- editor webu (jen admin) ---
@@ -321,6 +340,7 @@ const DEFAULT_WEB = {
   barvy: { bg: "#010a13", panel: "#0a1428", gold: "#c8aa6e", gold2: "#f0e6d2", text: "#cdbe91", up: "#0acbe6", down: "#e84057" },
   css: "",
   patche: [
+    { nadpis: "Patch 2.3 · 7. 10. 2026", text: "Zápis a grafy.\n- Body se píšou jen čísly, bez šipek nahoru a dolů.\n- Vítěze označíš tlačítkem 🏆 vítěz: dostane 0 bodů a ostatním se tlačítko zašedí.\n- Grafy Elo se při otevření postupně vykreslí hru po hře, ▶ Přehrát to pustí znovu.\n- Nové hry mají u sebe datum a čas zápisu." },
     { nadpis: "Patch 2.2 · 7. 10. 2026", text: "Editor webu pro admina.\n- Po přihlášení adminem se objeví záložka 🛠 Editor.\n- Admin v ní mění název webu, barvy, patch notes a může přidat vlastní CSS.\n- Změny se ukládají do tabulky a uvidí je všichni." },
     { nadpis: "Patch 2.1 · 7. 10. 2026", text: "Nový zápis hry.\n- Hráče vybereš kliknutím na bubliny s jejich rank emblémem.\n- Pod každým vybraným hráčem je karta s políčkem na body, tlačítko 🏆 zavřel zapíše 0.\n- Nového hráče přidáš bublinou „+ Nový hráč“." },
     { nadpis: "Update 2.0 · 7. 10. 2026", text: "Liga žolíků má vlastní web.\n- Žebříček s rank emblémy, historie her, graf vývoje Elo a profily hráčů.\n- Rank up a rank down animace jako v League of Legends – přehrají se po nové hře i na kliknutí ▶ u hry.\n- Hry zapisuje kdokoli přímo na webu, výsledky se ukládají do tabulky.\n- Admin může s heslem smazat špatně zapsanou hru.\n- Minulá sezóna je na webu taky, stačí ji vybrat nahoře." },
