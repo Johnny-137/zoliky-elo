@@ -37,7 +37,19 @@ td{padding:8px 6px;border-top:1px solid #1e2328}
 .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.8rem}
 .legend span::before{content:"";display:inline-block;width:10px;height:10px;margin-right:4px;background:var(--c)}
 /* profil */
-#zf table{max-width:460px}
+#bubs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.bub{cursor:pointer}
+.bub input{position:absolute;opacity:0}
+.bub span,.bub.add{display:flex;align-items:center;gap:6px;padding:4px 14px 4px 6px;border:1px solid var(--line);border-radius:999px;background:#1e2328;color:var(--text);font-weight:600}
+.bub .emb{width:26px;height:26px}
+.bub input:checked+span{border-color:var(--gold);background:#3a2f12;color:var(--gold2);box-shadow:0 0 10px #c8aa6e66}
+.bub input:focus-visible+span{outline:2px solid var(--up)}
+.bub.add{padding:4px 14px;border-style:dashed}
+#sel{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:14px 0}
+.card{border:1px solid var(--gold);background:#010a13;padding:10px;display:grid;gap:6px;text-align:center}
+.card b{color:var(--gold2)}
+.card input{width:100%;font-size:1.3rem;text-align:center}
+.win{font-size:.8rem}
 dialog{background:var(--panel);color:var(--text);border:1px solid var(--gold);max-width:520px;width:calc(100% - 32px);padding:18px}
 dialog::backdrop{background:#000a}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
@@ -183,9 +195,9 @@ const VIEWS = {
     if (!SCRIPT_URL) return `<div class="panel"><h2>Zápis hry</h2><p>Zápis ještě není propojený s tabulkou (chybí adresa Apps Scriptu).</p></div>`;
     const known = S[s.id].table.map(x => x.p).concat(s.players.filter(p => !S[s.id].st[p].games));
     return `<div class="panel"><h2>Zápis hry · ${esc(s.name)} #${S[s.id].hist.length + 1}</h2>
-      <p class="muted">Vyplň trestné body jen těm, kdo hráli. Kdo zavřel, má 0. Prázdné = nehrál.</p>
-      <form id="zf"><table>${known.map(p => `<tr><td>${esc(p)}</td><td><input type="number" min="0" step="1" name="${esc(p)}" inputmode="numeric"></td></tr>`).join("")}
-      <tr><td><input type="text" id="novy" placeholder="Nový hráč (jméno)"></td><td><input type="number" min="0" step="1" id="novyb" placeholder="body"></td></tr></table>
+      <p class="muted">1. Klikni na hráče, kteří hráli. 2. Pod každého napiš trestné body (kdo zavřel, má 0).</p>
+      <form id="zf"><div id="bubs">${known.map(bubble).join("")}<button type="button" id="novy" class="bub add">+ Nový hráč</button></div>
+      <div id="sel"></div>
       <p><button>Uložit hru</button></p>
       <p id="zmsg" class="muted" role="status"></p></form></div>
       <div class="panel"><h2>Admin</h2>${admin()
@@ -246,12 +258,14 @@ document.addEventListener("submit", async e => {
   if (e.target.id !== "zf") return;
   e.preventDefault();
   const f = e.target, msg = $("#zmsg"), hra = {};
-  for (const i of f.querySelectorAll("input[type=number][name]")) if (i.value !== "") hra[i.name] = +i.value;
-  const novy = $("#novy").value.trim();
-  if (novy) { if ($("#novyb").value === "") return msg.textContent = "Nový hráč potřebuje body."; hra[novy] = +$("#novyb").value; }
+  const inputs = [...f.querySelectorAll("#sel input")];
+  if (inputs.some(i => i.value === "")) return msg.textContent = "Doplň body všem vybraným hráčům.";
+  inputs.forEach(i => hra[i.name] = +i.value);
+  const nove = Object.keys(hra).filter(p => !D.seasons[0].players.includes(p)), novy = nove[0];
+  if (nove.length > 1) return msg.textContent = "V jedné hře může být nejvýš 1 nový hráč.";
   const v = Object.values(hra);
-  if (v.length < 2) return msg.textContent = "Hru musí hrát aspoň 2 hráči.";
-  if (v.some(x => !Number.isInteger(x) || x < 0)) return msg.textContent = "Body musí být celá čísla od 0.";
+  if (v.length < 2 || v.length > 6) return msg.textContent = "Vyber 2–6 hráčů.";
+  if (v.some(x => !Number.isInteger(x) || x < 0 || x > 999)) return msg.textContent = "Body musí být celá čísla 0–999.";
   if (!v.includes(0)) return msg.textContent = "Někdo musí zavřít (0 bodů).";
   msg.textContent = "Ukládám…";
   try {
@@ -261,6 +275,28 @@ document.addEventListener("submit", async e => {
     await reload(s => { s.games.push(hra); if (novy) s.players.push(novy); });
     autoPlay();
   } catch (err) { msg.textContent = "Nepodařilo se spojit s tabulkou: " + err.message; }
+});
+
+// --- zápis: bubliny hráčů ---
+const bubble = p => `<label class="bub"><input type="checkbox" value="${esc(p)}"><span>${emblem(rank(S[D.seasons[0].id].st[p]?.elo ?? D.settings.start))}${esc(p)}</span></label>`;
+function cards() {
+  const vals = {};
+  $("#sel").querySelectorAll("input").forEach(i => vals[i.name] = i.value);
+  $("#sel").innerHTML = [...$("#bubs").querySelectorAll("input:checked")].map(c => `<div class="card"><b>${esc(c.value)}</b>
+    <input type="number" min="0" max="999" step="1" inputmode="numeric" name="${esc(c.value)}" value="${esc(vals[c.value] ?? "")}" placeholder="body" aria-label="Body ${esc(c.value)}">
+    <button type="button" class="win" data-win="${esc(c.value)}">🏆 zavřel</button></div>`).join("");
+}
+document.addEventListener("change", e => { if (e.target.closest("#bubs")) cards(); });
+document.addEventListener("click", e => {
+  if (e.target.id === "novy") {
+    const p = (prompt("Jméno nového hráče:") || "").trim();
+    if (!p) return;
+    if (![...$("#bubs").querySelectorAll("input")].some(i => i.value === p)) e.target.insertAdjacentHTML("beforebegin", bubble(p));
+    [...$("#bubs").querySelectorAll("input")].find(i => i.value === p).checked = true;
+    cards();
+  }
+  const w = e.target.closest("[data-win]");
+  if (w) $("#sel").querySelector(`input[name="${CSS.escape(w.dataset.win)}"]`).value = 0;
 });
 
 // --- admin: mazání her ---
