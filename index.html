@@ -11,14 +11,14 @@
 *{box-sizing:border-box}
 body{margin:0;background:radial-gradient(ellipse at top,#0e2034,var(--bg) 60%) fixed;color:var(--text);font:15px/1.45 Inter,system-ui,sans-serif;min-height:100vh}
 h1,h2,.cinzel{font-family:Cinzel,serif;color:var(--gold2);letter-spacing:.06em}
-header{padding:18px 16px 0;max-width:960px;margin:auto;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+header{padding:18px 16px 0;max-width:1100px;margin:auto;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
 h1{margin:0;font-size:1.6rem}
-select,button{font:inherit;background:#1e2328;color:var(--gold2);border:1px solid var(--gold);padding:6px 10px;cursor:pointer}
+select,button,input{font:inherit;background:#1e2328;color:var(--gold2);border:1px solid var(--gold);padding:6px 10px;cursor:pointer}
 button:hover{background:#2a3038}
-nav{max-width:960px;margin:12px auto 0;padding:0 16px;display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav{max-width:1100px;margin:12px auto 0;padding:0 16px;display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
 nav button{border:0;background:none;color:var(--muted);text-transform:uppercase;font-weight:700;font-size:.8rem;letter-spacing:.08em;padding:10px 12px;white-space:nowrap}
 nav button.on{color:var(--gold2);box-shadow:inset 0 -2px var(--gold)}
-main{max-width:960px;margin:auto;padding:16px}
+main{max-width:1100px;margin:auto;padding:16px}
 .panel{background:linear-gradient(#0a1428ee,#091220ee);border:1px solid var(--line);padding:14px;margin-bottom:14px}
 table{width:100%;border-collapse:collapse}
 th{font-size:.72rem;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px}
@@ -37,6 +37,7 @@ td{padding:8px 6px;border-top:1px solid #1e2328}
 .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.8rem}
 .legend span::before{content:"";display:inline-block;width:10px;height:10px;margin-right:4px;background:var(--c)}
 /* profil */
+#zf table{max-width:460px}
 dialog{background:var(--panel);color:var(--text);border:1px solid var(--gold);max-width:520px;width:calc(100% - 32px);padding:18px}
 dialog::backdrop{background:#000a}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
@@ -80,6 +81,8 @@ dialog::backdrop{background:#000a}
 <script src="elo.js"></script>
 <script>
 // Hry aktuální sezóny se čtou živě z Google tabulky (list Hry); když to nejde, použije se kopie v data.json.
+// Adresa webové aplikace z Apps Scriptu (zapis.gs) – přes ni web zapisuje nové hry do tabulky.
+const SCRIPT_URL = "";
 const SHEET = "https://docs.google.com/spreadsheets/d/1BD5QGv3iKg3nP_JIF1HJng8Mh3q_-CD6O8b0j3PasO8/gviz/tq?tqx=out:csv&sheet=Hry&range=";
 const RANK_COLOR = {Iron:"#6e6a66",Bronze:"#a8673f",Silver:"#a9b4c0",Gold:"#d9ae4a",Platinum:"#4fb3a6",Emerald:"#2fc27a",Diamond:"#7690ff",Master:"#b25cf0",Grandmaster:"#e3404d",Challenger:"#f2d27a"};
 const LINE = ["#c8aa6e","#0acbe6","#e84057","#2fc27a","#b25cf0","#f08a24","#a9b4c0","#ff7ac6"];
@@ -138,7 +141,7 @@ async function init() {
 }
 
 // --- pohledy ---
-const TABS = { zebricek: "Žebříček", hry: "Hry", vyvoj: "Vývoj Elo", pravidla: "Pravidla" };
+const TABS = { zebricek: "Žebříček", hry: "Hry", zapis: "Zápis hry", vyvoj: "Vývoj Elo", patch: "Patch notes", pravidla: "Pravidla" };
 function render() {
   $("#tabs").innerHTML = Object.entries(TABS).map(([k, v]) => `<button class="${k === tab ? "on" : ""}" data-t="${k}">${v}</button>`).join("");
   $("#tabs").onclick = e => { if (e.target.dataset.t) { tab = e.target.dataset.t; render(); } };
@@ -156,7 +159,7 @@ const VIEWS = {
       <td class="num">${Math.round(100 * s.wins / s.games)}%</td><td class="num hide-sm">${(s.pts / s.games).toFixed(1).replace(".", ",")}</td></tr>`; }).join("");
     return `<div class="panel"><h2>${esc(cur.name)}</h2><p class="muted">${hist.length} her · ${table.length} hráčů${cur.id === D.seasons[0].id ? " · data: " + D.src : " · archiv, do aktuálního Elo se nepočítá"}</p>
       <table><tr><th>#</th><th>Hráč</th><th class="num">Elo</th><th class="num">Hry</th><th class="num hide-sm">Výhry</th><th class="num">Win%</th><th class="num hide-sm">Ø body</th></tr>${rows}</table></div>
-      ${cur.kulometnici ? kulometnici() : ""}`;
+`;
   },
   hry() {
     const { hist } = S[cur.id];
@@ -172,6 +175,32 @@ const VIEWS = {
     const { hist, table } = S[cur.id];
     return `<div class="panel"><h2>Vývoj Elo</h2>${chart(hist, table.map(s => s.p))}</div>`;
   },
+  zapis() {
+    const s = D.seasons[0];
+    if (!SCRIPT_URL) return `<div class="panel"><h2>Zápis hry</h2><p>Zápis ještě není propojený s tabulkou (chybí adresa Apps Scriptu).</p></div>`;
+    const known = S[s.id].table.map(x => x.p).concat(s.players.filter(p => !S[s.id].st[p].games));
+    return `<div class="panel"><h2>Zápis hry · ${esc(s.name)} #${S[s.id].hist.length + 1}</h2>
+      <p class="muted">Vyplň trestné body jen těm, kdo hráli. Kdo zavřel, má 0. Prázdné = nehrál.</p>
+      <form id="zf"><table>${known.map(p => `<tr><td>${esc(p)}</td><td><input type="number" min="0" step="1" name="${esc(p)}" inputmode="numeric"></td></tr>`).join("")}
+      <tr><td><input type="text" id="novy" placeholder="Nový hráč (jméno)"></td><td><input type="number" min="0" step="1" id="novyb" placeholder="body"></td></tr></table>
+      <p><input type="password" id="heslo" placeholder="Heslo" value="${esc(store("zoliky-heslo") || "")}"> <button>Uložit hru</button></p>
+      <p id="zmsg" class="muted" role="status"></p></form></div>`;
+  },
+  patch() {
+    return `<div class="panel"><h2>Patch 1.1 · 29. 9. 2026</h2><p>Elo se nově počítá hlavně podle toho, s kolika body kdo skončí – ne jen podle toho, kdo zavřel.</p><ul>
+      <li>Body rozhodují z 80 %: každá dvojice u stolu se porovná podle rozdílu zbylých bodů.</li>
+      <li>Kdo skončí těsně za vítězem, skoro nic neztratí. Kdo zůstane s plnou rukou, ztratí nejvíc.</li>
+      <li>Zavření rozhoduje z 20 %, takže vítěz si vždycky něco připíše.</li>
+      <li>Rozdíl 150 bodů a víc se počítá jako jasná prohra.</li>
+      <li>Užší ranky: každý rank má 25 Elo (Silver od 1490, Gold od 1515, Platinum od 1540 …). Start 1500 = Silver.</li>
+      <li>K-faktor zůstává 44.</li>
+      <li>Sezóna 1 i minulá sezóna jsou přepočítané podle nových pravidel.</li></ul>
+      <p class="muted">Proč: z téměř 70 her vyšlo, že o tom, kdo zavře, rozhoduje zatím hlavně náhoda – zbylé body lépe ukazují, kdo hraje dobře.</p></div>
+      <div class="panel"><h2>Patch 1.0 · Start ligy</h2><ul>
+      <li>Elo pro stoly 3–6 hráčů: každý se porovná s každým, kdo seděl u stejného stolu.</li>
+      <li>Ranky Iron až Challenger podle League of Legends, start v Silveru (1500).</li>
+      <li>Minulá sezóna je v archivu a do aktuálního Elo se nepočítá.</li></ul></div>`;
+  },
   pravidla() {
     const s = D.settings;
     return `<div class="panel"><h2>Pravidla (patch 1.1)</h2><ul>
@@ -183,12 +212,6 @@ const VIEWS = {
       <h2>Ranky</h2><table>${D.ranks.map(([r, f]) => `<tr><td><div class="player">${emblem(r)}${r}</div></td><td class="num">od ${f || "—"}</td></tr>`).join("")}</table></div>`;
   }
 };
-
-function kulometnici() {
-  const k = cur.kulometnici;
-  return `<div class="panel"><h2>Kulometníci (hry 1–${Object.values(k)[0].length})</h2><table><tr><th>Hráč</th><th class="num">Celkem</th><th class="num">Ø na hru</th></tr>${Object.entries(k).map(([p, a]) => { const t = a.reduce((x, y) => x + y, 0);
-    return `<tr><td>${name(p)}</td><td class="num">${t}</td><td class="num">${(t / a.length).toFixed(2).replace(".", ",")}</td></tr>`; }).join("")}</table></div>`;
-}
 
 function chart(hist, players, w = 900, h = 320) {
   const vals = hist.flatMap(x => players.map(p => x.after[p])).concat(D.settings.start);
@@ -212,6 +235,30 @@ function openProfile(p) {
     ${chart(S[cur.id].hist, [p], 500, 200)}<form method="dialog" style="text-align:right;margin-top:10px"><button>Zavřít</button></form>`;
   dlg.showModal();
 }
+
+document.addEventListener("submit", async e => {
+  if (e.target.id !== "zf") return;
+  e.preventDefault();
+  const f = e.target, msg = $("#zmsg"), hra = {};
+  for (const i of f.querySelectorAll("input[type=number][name]")) if (i.value !== "") hra[i.name] = +i.value;
+  const novy = $("#novy").value.trim();
+  if (novy) { if ($("#novyb").value === "") return msg.textContent = "Nový hráč potřebuje body."; hra[novy] = +$("#novyb").value; }
+  const v = Object.values(hra);
+  if (v.length < 2) return msg.textContent = "Hru musí hrát aspoň 2 hráči.";
+  if (v.some(x => !Number.isInteger(x) || x < 0)) return msg.textContent = "Body musí být celá čísla od 0.";
+  if (!v.includes(0)) return msg.textContent = "Někdo musí zavřít (0 bodů).";
+  const heslo = $("#heslo").value;
+  msg.textContent = "Ukládám…";
+  try {
+    const r = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ heslo, hra }) }).then(x => x.json());
+    if (!r.ok) return msg.textContent = r.chyba || "Uložení selhalo.";
+    store("zoliky-heslo", heslo);
+    // načti znovu z tabulky; když tabulka ještě nestihla, přidej hru lokálně
+    try { Object.assign(D.seasons[0], await live()); } catch { D.seasons[0].games.push(hra); if (novy) D.seasons[0].players.push(novy); }
+    S[D.seasons[0].id] = stats(D.seasons[0]);
+    cur = D.seasons[0]; $("#season").value = cur.id; tab = "hry"; render(); autoPlay();
+  } catch (err) { msg.textContent = "Nepodařilo se spojit s tabulkou: " + err.message; }
+});
 
 // --- rank up / rank down animace ---
 let queue = [], playing = false;
