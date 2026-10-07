@@ -202,7 +202,7 @@ async function init() {
 // --- pohledy ---
 const TABS = { zebricek: "Žebříček", hry: "Hry", zapis: "Zápis hry", vyvoj: "Vývoj Elo", patch: "Patch notes", pravidla: "Pravidla", editor: "🛠 Editor", hraci: "Hráči" };
 // Záložky jen pro admina (vývojářský režim) – náhled funkcí, které ještě nejsou pro všechny.
-const DEV_TABS = ["editor", "hraci"];
+const DEV_TABS = ["editor"];
 function render() {
   if (DEV_TABS.includes(tab) && !admin()) tab = "zebricek";
   $("#tabs").innerHTML = Object.entries(TABS).filter(([k]) => !DEV_TABS.includes(k) || admin()).map(([k, v]) => `<button class="${k === tab ? "on" : ""}" data-t="${k}">${v}</button>`).join("");
@@ -448,6 +448,7 @@ const DEFAULT_WEB = {
   barvy: { bg: "#010a13", panel: "#0a1428", gold: "#c8aa6e", gold2: "#f0e6d2", text: "#cdbe91", up: "#0acbe6", down: "#e84057" },
   css: "",
   patche: [
+    { nadpis: "Patch 2.4 · 7. 10. 2026", text: "Nová záložka Hráči a plná podpora mobilu.\n- Záložka Hráči: najdeš hráče přes políčko Hledat (nevadí diakritika ani velká písmena).\n- U hráče uvidíš rank, Elo, winrate, hry, výhry a trestné body jako dlaždice, pod tím velký animovaný graf Elo.\n- Další statistiky: peak a bottom rank, nejdelší série výher, forma za posledních 5 her, největší zisk a ztráta Elo, nejlepší a nejhorší hra a nejčastější soupeř.\n- Porovnání: přidej víc hráčů a jejich grafy se překryjí, statistiky budou vedle sebe.\n- Zápis hry: kdo napíše 0, je hned označený jako vítěz.\n- Mobil: záložky se zalamují, grafy jsou čitelné a dlaždice jsou pod sebou." },
     { nadpis: "Patch 2.3 · 7. 10. 2026", text: "Zápis a grafy.\n- Body se píšou jen čísly, bez šipek nahoru a dolů.\n- Vítěze označíš tlačítkem 🏆 vítěz: dostane 0 bodů a ostatním se tlačítko zašedí.\n- Grafy Elo se při otevření postupně vykreslí hru po hře, kliknutím na graf se animace pustí znovu.\n- Nové hry mají u sebe datum a čas zápisu." },
     { nadpis: "Patch 2.2 · 7. 10. 2026", text: "Editor webu pro admina.\n- Po přihlášení adminem se objeví záložka 🛠 Editor.\n- Admin v ní mění název webu, barvy, patch notes a může přidat vlastní CSS.\n- Změny se ukládají do tabulky a uvidí je všichni." },
     { nadpis: "Patch 2.1 · 7. 10. 2026", text: "Nový zápis hry.\n- Hráče vybereš kliknutím na bubliny s jejich rank emblémem.\n- Pod každým vybraným hráčem je karta s políčkem na body, tlačítko 🏆 zavřel zapíše 0.\n- Nového hráče přidáš bublinou „+ Nový hráč“." },
