@@ -1,0 +1,808 @@
+{
+ "settings": {
+  "start": 1500,
+  "k": 44,
+  "closeWeight": 0.2,
+  "clearLoss": 150
+ },
+ "ranks": [
+  [
+   "Iron",
+   0
+  ],
+  [
+   "Bronze",
+   1465
+  ],
+  [
+   "Silver",
+   1490
+  ],
+  [
+   "Gold",
+   1515
+  ],
+  [
+   "Platinum",
+   1540
+  ],
+  [
+   "Emerald",
+   1565
+  ],
+  [
+   "Diamond",
+   1590
+  ],
+  [
+   "Master",
+   1615
+  ],
+  [
+   "Grandmaster",
+   1640
+  ],
+  [
+   "Challenger",
+   1665
+  ]
+ ],
+ "seasons": [
+  {
+   "id": "s1",
+   "name": "Sezóna 1",
+   "players": [
+    "Vitek",
+    "Bibi",
+    "Denis",
+    "Johnny",
+    "Erik",
+    "eliška"
+   ],
+   "games": [
+    {
+     "Vitek": 0,
+     "Bibi": 15,
+     "Denis": 116,
+     "Johnny": 7
+    },
+    {
+     "Vitek": 8,
+     "Bibi": 18,
+     "Denis": 99,
+     "Johnny": 0
+    },
+    {
+     "Vitek": 0,
+     "Bibi": 109,
+     "Johnny": 10
+    },
+    {
+     "Vitek": 4,
+     "Bibi": 10,
+     "Johnny": 0
+    },
+    {
+     "Vitek": 8,
+     "Bibi": 0,
+     "Johnny": 3
+    },
+    {
+     "Vitek": 0,
+     "Bibi": 102,
+     "Johnny": 89
+    },
+    {
+     "Vitek": 72,
+     "Bibi": 128,
+     "Johnny": 0
+    },
+    {
+     "Vitek": 141,
+     "Bibi": 136,
+     "Johnny": 0
+    },
+    {
+     "Vitek": 12,
+     "Bibi": 102,
+     "Denis": 0,
+     "Johnny": 15
+    },
+    {
+     "Vitek": 6,
+     "Bibi": 16,
+     "Denis": 150,
+     "Johnny": 0
+    },
+    {
+     "Vitek": 0,
+     "Bibi": 3,
+     "Denis": 129,
+     "Johnny": 14
+    },
+    {
+     "Vitek": 0,
+     "Bibi": 93,
+     "Denis": 153
+    },
+    {
+     "Vitek": 17,
+     "Bibi": 13,
+     "Denis": 0
+    },
+    {
+     "Vitek": 14,
+     "Bibi": 0,
+     "Denis": 91,
+     "Johnny": 41
+    },
+    {
+     "Vitek": 38,
+     "Bibi": 0,
+     "Johnny": 105,
+     "Erik": 29
+    },
+    {
+     "Vitek": 20,
+     "Bibi": 8,
+     "Johnny": 0,
+     "Erik": 140
+    },
+    {
+     "Vitek": 3,
+     "Bibi": 0,
+     "Johnny": 37,
+     "Erik": 98
+    },
+    {
+     "Vitek": 29,
+     "Bibi": 22,
+     "Johnny": 234,
+     "Erik": 0
+    },
+    {
+     "Denis": 0,
+     "Johnny": 2,
+     "Erik": 24
+    },
+    {
+     "Bibi": 122,
+     "Denis": 196,
+     "Johnny": 0,
+     "Erik": 192
+    },
+    {
+     "Bibi": 25,
+     "Denis": 2,
+     "Erik": 0
+    },
+    {
+     "Bibi": 45,
+     "Denis": 27,
+     "Erik": 0
+    },
+    {
+     "Bibi": 20,
+     "Denis": 5,
+     "Erik": 0
+    },
+    {
+     "Bibi": 40,
+     "Denis": 0
+    },
+    {
+     "Vitek": 61,
+     "Denis": 0
+    },
+    {
+     "Vitek": 58,
+     "Denis": 0
+    },
+    {
+     "Vitek": 28,
+     "Bibi": 0,
+     "Denis": 230
+    },
+    {
+     "Vitek": 0,
+     "Bibi": 175,
+     "Denis": 157
+    },
+    {
+     "Vitek": 180,
+     "Bibi": 0,
+     "Denis": 36
+    },
+    {
+     "Vitek": 26,
+     "Bibi": 227,
+     "Erik": 0
+    },
+    {
+     "Vitek": 17,
+     "Bibi": 0,
+     "Erik": 23
+    },
+    {
+     "Vitek": 18,
+     "Bibi": 0,
+     "Erik": 55
+    },
+    {
+     "Vitek": 24,
+     "Bibi": 85,
+     "Erik": 0
+    },
+    {
+     "Vitek": 0,
+     "Bibi": 10,
+     "Erik": 45
+    },
+    {
+     "Vitek": 6,
+     "Bibi": 10,
+     "Johnny": 0,
+     "Erik": 31
+    },
+    {
+     "Vitek": 2,
+     "Bibi": 113,
+     "Johnny": 92,
+     "Erik": 0
+    },
+    {
+     "Denis": 0,
+     "Johnny": 10
+    },
+    {
+     "Denis": 20,
+     "Johnny": 0
+    },
+    {
+     "Denis": 32,
+     "Johnny": 53,
+     "Erik": 0
+    },
+    {
+     "Vitek": 28,
+     "Denis": 99,
+     "Johnny": 190,
+     "Erik": 0
+    },
+    {
+     "Vitek": 8,
+     "Denis": 0,
+     "Johnny": 21
+    },
+    {
+     "Vitek": 4,
+     "Denis": 3,
+     "Johnny": 0
+    },
+    {
+     "Denis": 12,
+     "Johnny": 0
+    },
+    {
+     "Vitek": 4,
+     "Denis": 0,
+     "Johnny": 235
+    },
+    {
+     "Vitek": 3,
+     "Bibi": 0,
+     "Erik": 94
+    },
+    {
+     "Vitek": 16,
+     "Bibi": 10,
+     "Erik": 0
+    },
+    {
+     "Vitek": 0,
+     "Bibi": 163
+    },
+    {
+     "Vitek": 3,
+     "Bibi": 108,
+     "Johnny": 9,
+     "Erik": 0
+    },
+    {
+     "Vitek": 17,
+     "Bibi": 14,
+     "Johnny": 12,
+     "Erik": 0
+    },
+    {
+     "Vitek": 4,
+     "Bibi": 32,
+     "Erik": 0,
+     "eliška": 104
+    },
+    {
+     "Vitek": 18,
+     "Bibi": 7,
+     "Erik": 0,
+     "eliška": 148
+    },
+    {
+     "Bibi": 0,
+     "Denis": 25,
+     "Erik": 50
+    },
+    {
+     "Bibi": 13,
+     "Denis": 10,
+     "Erik": 0
+    },
+    {
+     "Bibi": 5,
+     "Denis": 96,
+     "Erik": 0
+    },
+    {
+     "Denis": 0,
+     "Erik": 16
+    },
+    {
+     "Denis": 0,
+     "Erik": 186
+    },
+    {
+     "Denis": 175,
+     "Erik": 0
+    },
+    {
+     "Denis": 190,
+     "Erik": 0
+    },
+    {
+     "Denis": 0,
+     "Erik": 97
+    },
+    {
+     "Denis": 0,
+     "Erik": 12
+    },
+    {
+     "Denis": 165,
+     "Erik": 0
+    },
+    {
+     "Denis": 19,
+     "Erik": 0
+    },
+    {
+     "Vitek": 2,
+     "Bibi": 0
+    },
+    {
+     "Vitek": 2,
+     "Bibi": 0
+    },
+    {
+     "Vitek": 0,
+     "Bibi": 40
+    },
+    {
+     "Vitek": 4,
+     "Bibi": 0
+    },
+    {
+     "Vitek": 0,
+     "Bibi": 136,
+     "Johnny": 114
+    },
+    {
+     "Vitek": 0,
+     "Bibi": 9,
+     "Johnny": 2
+    }
+   ]
+  },
+  {
+   "id": "s0",
+   "name": "Minulá sezóna",
+   "players": [
+    "Asiat",
+    "Duchod",
+    "Gay",
+    "Voják",
+    "Ital",
+    "Šmorgy",
+    "Kri",
+    "Stý"
+   ],
+   "fullNames": {
+    "Asiat": "Bilgudey Ariunsanaa",
+    "Duchod": "Erik Servít",
+    "Gay": "Jan Vrabček",
+    "Voják": "Vítek Petrák",
+    "Ital": "Denis Tavanti",
+    "Šmorgy": "Petr Šmíd",
+    "Kri": "Barbora Kubínová",
+    "Stý": "Eliška Zavadilová"
+   },
+   "kulometnici": {
+    "Asiat": [
+     0,
+     2,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "Duchod": [
+     2,
+     0,
+     2,
+     0,
+     2,
+     1,
+     2,
+     0
+    ],
+    "Voják": [
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     2
+    ]
+   },
+   "games": [
+    {
+     "Asiat": 0,
+     "Duchod": 2,
+     "Gay": 71,
+     "Voják": 12
+    },
+    {
+     "Asiat": 0,
+     "Duchod": 86,
+     "Gay": 12,
+     "Voják": 83
+    },
+    {
+     "Asiat": 89,
+     "Duchod": 18,
+     "Gay": 0,
+     "Voják": 69
+    },
+    {
+     "Asiat": 0,
+     "Duchod": 7,
+     "Gay": 91,
+     "Voják": 4,
+     "Ital": 89
+    },
+    {
+     "Asiat": 110,
+     "Duchod": 63,
+     "Gay": 99,
+     "Voják": 59,
+     "Ital": 73,
+     "Šmorgy": 0
+    },
+    {
+     "Duchod": 101,
+     "Gay": 0,
+     "Voják": 100
+    },
+    {
+     "Asiat": 75,
+     "Duchod": 0,
+     "Gay": 101,
+     "Voják": 36
+    },
+    {
+     "Asiat": 46,
+     "Duchod": 92,
+     "Gay": 0,
+     "Voják": 14
+    },
+    {
+     "Asiat": 15,
+     "Duchod": 13,
+     "Gay": 0,
+     "Voják": 19
+    },
+    {
+     "Asiat": 97,
+     "Duchod": 12,
+     "Gay": 16,
+     "Voják": 0
+    },
+    {
+     "Asiat": 0,
+     "Duchod": 17,
+     "Gay": 28,
+     "Voják": 78
+    },
+    {
+     "Asiat": 118,
+     "Duchod": 0,
+     "Gay": 78,
+     "Voják": 12
+    },
+    {
+     "Asiat": 9,
+     "Duchod": 0,
+     "Gay": 95
+    },
+    {
+     "Asiat": 86,
+     "Duchod": 73,
+     "Gay": 95,
+     "Ital": 53,
+     "Šmorgy": 0
+    },
+    {
+     "Asiat": 80,
+     "Duchod": 102,
+     "Gay": 42,
+     "Ital": 12,
+     "Šmorgy": 0
+    },
+    {
+     "Asiat": 82,
+     "Duchod": 24,
+     "Gay": 0,
+     "Ital": 19,
+     "Šmorgy": 9
+    },
+    {
+     "Asiat": 22,
+     "Duchod": 0,
+     "Gay": 89,
+     "Ital": 106,
+     "Šmorgy": 6
+    },
+    {
+     "Asiat": 41,
+     "Duchod": 86,
+     "Gay": 0
+    },
+    {
+     "Asiat": 102,
+     "Duchod": 0,
+     "Gay": 105,
+     "Kri": 83,
+     "Stý": 94
+    },
+    {
+     "Asiat": 0,
+     "Duchod": 81,
+     "Gay": 36,
+     "Kri": 78,
+     "Stý": 80
+    },
+    {
+     "Asiat": 17,
+     "Duchod": 0,
+     "Gay": 6,
+     "Kri": 103,
+     "Stý": 6
+    },
+    {
+     "Asiat": 108,
+     "Duchod": 18,
+     "Gay": 0,
+     "Kri": 84,
+     "Stý": 17
+    },
+    {
+     "Asiat": 0,
+     "Duchod": 46,
+     "Gay": 89,
+     "Kri": 94,
+     "Stý": 114
+    },
+    {
+     "Asiat": 27,
+     "Duchod": 0,
+     "Gay": 10,
+     "Kri": 83,
+     "Stý": 80
+    },
+    {
+     "Asiat": 10,
+     "Duchod": 92,
+     "Gay": 86,
+     "Kri": 72,
+     "Stý": 0
+    },
+    {
+     "Asiat": 10,
+     "Duchod": 18,
+     "Voják": 5,
+     "Kri": 66,
+     "Stý": 0
+    },
+    {
+     "Asiat": 95,
+     "Duchod": 95,
+     "Gay": 20,
+     "Voják": 0,
+     "Kri": 85,
+     "Stý": 109
+    },
+    {
+     "Asiat": 96,
+     "Duchod": 15,
+     "Gay": 0,
+     "Voják": 3
+    },
+    {
+     "Asiat": 0,
+     "Duchod": 7,
+     "Gay": 2,
+     "Ital": 66,
+     "Šmorgy": 10
+    },
+    {
+     "Asiat": 85,
+     "Duchod": 103,
+     "Gay": 94,
+     "Voják": 0,
+     "Ital": 84,
+     "Šmorgy": 94
+    },
+    {
+     "Asiat": 87,
+     "Duchod": 81,
+     "Gay": 80,
+     "Voják": 0,
+     "Ital": 22,
+     "Šmorgy": 90
+    },
+    {
+     "Asiat": 86,
+     "Duchod": 73,
+     "Gay": 0,
+     "Voják": 80
+    },
+    {
+     "Asiat": 39,
+     "Duchod": 13,
+     "Gay": 0,
+     "Voják": 103
+    },
+    {
+     "Asiat": 4,
+     "Duchod": 5,
+     "Gay": 0,
+     "Voják": 4
+    },
+    {
+     "Asiat": 7,
+     "Duchod": 84,
+     "Gay": 22,
+     "Voják": 0
+    },
+    {
+     "Asiat": 0,
+     "Duchod": 109,
+     "Gay": 6,
+     "Voják": 11
+    },
+    {
+     "Asiat": 11,
+     "Duchod": 58,
+     "Gay": 86,
+     "Voják": 4,
+     "Ital": 0
+    },
+    {
+     "Asiat": 93,
+     "Duchod": 97,
+     "Gay": 38,
+     "Voják": 0,
+     "Ital": 4
+    },
+    {
+     "Asiat": 0,
+     "Duchod": 8,
+     "Gay": 99,
+     "Voják": 77,
+     "Ital": 20
+    },
+    {
+     "Asiat": 100,
+     "Duchod": 79,
+     "Gay": 63,
+     "Voják": 98,
+     "Ital": 0,
+     "Šmorgy": 102
+    },
+    {
+     "Asiat": 25,
+     "Duchod": 86,
+     "Gay": 8,
+     "Ital": 16,
+     "Šmorgy": 0
+    },
+    {
+     "Asiat": 12,
+     "Duchod": 74,
+     "Gay": 0,
+     "Ital": 93
+    },
+    {
+     "Asiat": 35,
+     "Duchod": 81,
+     "Gay": 18,
+     "Ital": 0,
+     "Šmorgy": 104
+    },
+    {
+     "Asiat": 0,
+     "Duchod": 61,
+     "Gay": 15,
+     "Ital": 32,
+     "Šmorgy": 8
+    },
+    {
+     "Asiat": 101,
+     "Duchod": 0,
+     "Gay": 95,
+     "Ital": 104,
+     "Šmorgy": 14
+    },
+    {
+     "Asiat": 22,
+     "Duchod": 13,
+     "Gay": 88,
+     "Ital": 0,
+     "Šmorgy": 5
+    },
+    {
+     "Asiat": 16,
+     "Duchod": 63,
+     "Gay": 10,
+     "Ital": 0,
+     "Šmorgy": 100
+    },
+    {
+     "Asiat": 3,
+     "Duchod": 89,
+     "Gay": 96,
+     "Ital": 0,
+     "Šmorgy": 6
+    },
+    {
+     "Asiat": 14,
+     "Duchod": 0,
+     "Gay": 88,
+     "Voják": 17,
+     "Ital": 12
+    },
+    {
+     "Asiat": 0,
+     "Duchod": 32,
+     "Gay": 71,
+     "Voják": 95,
+     "Ital": 5
+    },
+    {
+     "Duchod": 91,
+     "Gay": 85,
+     "Voják": 82,
+     "Šmorgy": 0
+    },
+    {
+     "Duchod": 99,
+     "Gay": 3,
+     "Voják": 0,
+     "Šmorgy": 8
+    }
+   ]
+  }
+ ]
+}
