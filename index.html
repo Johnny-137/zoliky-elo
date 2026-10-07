@@ -58,8 +58,12 @@ td{padding:8px 6px;border-top:1px solid #1e2328}
 .card b{color:var(--gold2)}
 .card input{width:100%;font-size:1.3rem;text-align:center}
 .win{font-size:.8rem}
-#hsearch{width:min(320px,100%);font:inherit;background:#1e2328;color:var(--gold2);border:1px solid var(--gold);padding:8px}
 .hchip{margin:4px;border-color:var(--c);border-radius:999px;color:var(--c)}
+.hsearch{display:flex;gap:6px;max-width:420px}
+.hsearch input{flex:1;font:inherit;background:#1e2328;color:var(--gold2);border:1px solid var(--gold);padding:8px}
+.hres{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.hhit{display:flex;align-items:center;gap:6px;border-radius:999px;padding:3px 12px 3px 4px}
+.hhit .emb{width:24px;height:24px}
 .hgrid{margin-bottom:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
 .hgrid .panel{margin:0}
 .hcard{border-top:3px solid var(--c)}
@@ -70,7 +74,18 @@ td{padding:8px 6px;border-top:1px solid #1e2328}
 .tv span{color:var(--c);font-size:.85rem}
 .tv b{color:var(--gold2);font-size:1.2rem;white-space:nowrap;display:flex;align-items:center;gap:6px}
 .tv .emb{width:26px;height:26px}
-@media(max-width:600px){.tiles{grid-template-columns:1fr}}
+@media(max-width:600px){
+  .tiles{grid-template-columns:1fr}
+  nav{flex-wrap:wrap;overflow:visible}
+  nav button{padding:8px 9px}
+  main{padding:12px}
+  .panel{padding:12px}
+  h1{font-size:1.3rem}
+  input,select,textarea,button{font-size:16px}
+  .hgrid{grid-template-columns:1fr}
+  #sel{grid-template-columns:repeat(2,1fr)}
+  .game{gap:6px 10px}
+}
 .win:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
 .card.vitez{border-color:var(--up);box-shadow:0 0 12px var(--up)}
 .card.vitez .win{border-color:var(--up);color:var(--up)}
@@ -185,8 +200,8 @@ async function init() {
 }
 
 // --- pohledy ---
-const TABS = { zebricek: "Žebříček", hry: "Hry", zapis: "Zápis hry", vyvoj: "Vývoj Elo", patch: "Patch notes", pravidla: "Pravidla", editor: "🛠 Editor", hraci: "🧪 Hráči" };
-// Záložky jen pro admina (vývojářský režim). 🧪 = náhled funkce, která ještě není pro všechny.
+const TABS = { zebricek: "Žebříček", hry: "Hry", zapis: "Zápis hry", vyvoj: "Vývoj Elo", patch: "Patch notes", pravidla: "Pravidla", editor: "🛠 Editor", hraci: "Hráči" };
+// Záložky jen pro admina (vývojářský režim) – náhled funkcí, které ještě nejsou pro všechny.
 const DEV_TABS = ["editor", "hraci"];
 function render() {
   if (DEV_TABS.includes(tab) && !admin()) tab = "zebricek";
@@ -249,15 +264,23 @@ const VIEWS = {
     const ps = cmp.map(pstats);
     // Jedna dlaždice = jedna statistika, uvnitř hodnota pro každého vybraného hráče (barva = jeho čára v grafu).
     const row = (label, f) => `<div class="tile"><div class="tl">${label}</div>${ps.map((x, j) => `<div class="tv" style="--c:${LINE[j % LINE.length]}">${cmp.length > 1 ? `<span>${esc(x.p)}</span>` : ""}<b>${f(x)}</b></div>`).join("")}</div>`;
-    return `<div class="panel"><h2>Hráči <span class="muted">· náhled (jen vývojářský režim)</span></h2>
-      <p><input id="hsearch" list="hlist" placeholder="🔍 Najdi hráče…" autocomplete="off" aria-label="Najdi hráče"><datalist id="hlist">${all.filter(p => !cmp.includes(p)).map(p => `<option value="${esc(p)}">`).join("")}</datalist>
-      ${cmp.map((p, j) => `<button type="button" class="hchip" style="--c:${LINE[j % LINE.length]}" data-hdel="${esc(p)}" aria-label="Odebrat ${esc(p)}">${esc(p)} ✕</button>`).join("")}</p>
+    return `<div class="panel"><h2>Hráči</h2>
+      <form id="hf" class="hsearch" role="search"><input id="hsearch" type="search" placeholder="🔍 Hledat hráče…" autocomplete="off" aria-label="Hledat hráče"><button>Hledat</button></form>
+      <div id="hres" class="hres">${hres("")}</div>
+      <p>${cmp.map((p, j) => `<button type="button" class="hchip" style="--c:${LINE[j % LINE.length]}" data-hdel="${esc(p)}" aria-label="Odebrat ${esc(p)}">${esc(p)} ✕</button>`).join("")}</p>
       ${cmp.length ? "" : `<p class="muted">Vyber hráče. Přidáním dalších je porovnáš – grafy se překryjí a statistiky budou vedle sebe.</p>`}</div>
     ${cmp.length ? `<div class="hgrid">${ps.map((x, j) => `<div class="panel hcard" style="--c:${LINE[j % LINE.length]}">
-        <div class="player" style="cursor:auto">${emblem(x.rank, "emb\" style=\"width:64px;height:64px")}<div><h2 style="margin:0">${esc(x.p)}</h2><div class="rk">${x.rank} · <b>${fmt(x.elo)}</b> Elo</div></div></div>
-        <div class="stats"><div><b>${x.winrate}%</b>winrate</div><div><b>${x.games}</b>her</div><div><b>${x.wins}</b>výher</div><div><b>${x.avg}</b>Ø trestné body</div><div><b>${x.pts}</b>body celkem</div><div><b>${x.pos}.</b>v žebříčku</div></div></div>`).join("")}</div>
+        <div class="player" style="cursor:auto">${emblem(x.rank, "emb\" style=\"width:64px;height:64px")}<div><h2 style="margin:0">${esc(x.p)}</h2><div class="rk">${x.rank} · <b>${fmt(x.elo)}</b> Elo · ${x.pos}. v žebříčku</div></div></div></div>`).join("")}</div>
+      <div class="tiles" style="margin-bottom:14px">
+        ${row("Elo", x => fmt(x.elo))}
+        ${row("Winrate", x => x.winrate + " %")}
+        ${row("Hry", x => x.games)}
+        ${row("Výhry", x => x.wins)}
+        ${row("Ø trestné body", x => x.avg)}
+        ${row("Trestné body celkem", x => x.pts)}
+      </div>
       <div class="panel"><h2>Vývoj Elo</h2>${chart(S[cur.id].hist, cmp, 1000, 420)}</div>
-      <div class="panel"><h2>Statistiky</h2><div class="tiles">
+      <div class="panel"><h2>Další statistiky</h2><div class="tiles">
         ${row("Peak", x => `${emblem(x.peakRank)} ${x.peakRank} · ${fmt(x.max)}`)}
         ${row("Bottom", x => `${emblem(x.bottomRank)} ${x.bottomRank} · ${fmt(x.min)}`)}
         ${row("Nejdelší série výher", x => x.bestStreak)}
@@ -299,6 +322,8 @@ const VIEWS = {
 };
 
 function chart(hist, players, w = 900, h = 320) {
+  // Na mobilu užší plátno, ať popisky nejsou mikroskopické.
+  if (innerWidth < 600) { h = Math.round(h * .9); w = 420; }
   const vals = hist.flatMap(x => players.map(p => x.after[p])).concat(D.settings.start);
   const lo = Math.min(...vals) - 5, hi = Math.max(...vals) + 5, n = hist.length;
   const X = i => 30 + (w - 40) * i / n, Y = v => 10 + (h - 30) * (hi - v) / (hi - lo);
@@ -343,11 +368,14 @@ function pstats(p) {
     rival: rival ? `${esc(rival[0])} (${rival[1]}×)` : "—"
   };
 }
-document.addEventListener("change", e => {
-  if (e.target.id !== "hsearch") return;
-  const p = e.target.value.trim();
-  if (S[cur.id].st[p]?.games && !cmp.includes(p)) { cmp.push(p); render(); $("#hsearch")?.focus(); }
-});
+// Hledání bez ohledu na velikost písmen a diakritiku; výsledky se ukazují už při psaní.
+const norm = t => t.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+const hmatch = q => S[cur.id].table.map(x => x.p).filter(p => !cmp.includes(p) && norm(p).includes(norm(q.trim())));
+const hres = q => hmatch(q).map(p => `<button type="button" class="hhit" data-hadd="${esc(p)}">${emblem(rank(S[cur.id].st[p].elo))}${esc(p)}</button>`).join("") || `<span class="muted">Nikdo takový</span>`;
+function hadd(p) { cmp.push(p); render(); }
+document.addEventListener("input", e => { if (e.target.id === "hsearch") $("#hres").innerHTML = hres(e.target.value); });
+document.addEventListener("submit", e => { if (e.target.id !== "hf") return; e.preventDefault(); const m = hmatch($("#hsearch").value); if (m.length) hadd(m[0]); });
+document.addEventListener("click", e => { const b = e.target.closest("[data-hadd]"); if (b) hadd(b.dataset.hadd); });
 document.addEventListener("click", e => { const b = e.target.closest("[data-hdel]"); if (b) { cmp = cmp.filter(p => p !== b.dataset.hdel); render(); } });
 
 function openProfile(p) {
