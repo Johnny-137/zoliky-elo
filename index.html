@@ -82,7 +82,9 @@ dialog::backdrop{background:#000a}
 <script>
 // Hry aktuální sezóny se čtou živě z Google tabulky (list Hry); když to nejde, použije se kopie v data.json.
 // Adresa webové aplikace z Apps Scriptu (zapis.gs) – přes ni web zapisuje nové hry do tabulky.
-const SCRIPT_URL = "";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyUbebqNaNb9ADpLvHq2IEXjaEIKPXFvLiPG-CJBxc0XWBC-wCkmq9HUvablV_XBGY/exec";
+// Zápis her je pro kohokoli, proto je heslo pro zápis veřejně tady. Mazání chrání admin heslo, které je jen ve skriptu.
+const ZAPIS_HESLO = "zolik-3b1a73";
 const SHEET = "https://docs.google.com/spreadsheets/d/1BD5QGv3iKg3nP_JIF1HJng8Mh3q_-CD6O8b0j3PasO8/gviz/tq?tqx=out:csv&sheet=Hry&range=";
 const RANK_COLOR = {Iron:"#6e6a66",Bronze:"#a8673f",Silver:"#a9b4c0",Gold:"#d9ae4a",Platinum:"#4fb3a6",Emerald:"#2fc27a",Diamond:"#7690ff",Master:"#b25cf0",Grandmaster:"#e3404d",Challenger:"#f2d27a"};
 const LINE = ["#c8aa6e","#0acbe6","#e84057","#2fc27a","#b25cf0","#f08a24","#a9b4c0","#ff7ac6"];
@@ -184,7 +186,7 @@ const VIEWS = {
       <p class="muted">Vyplň trestné body jen těm, kdo hráli. Kdo zavřel, má 0. Prázdné = nehrál.</p>
       <form id="zf"><table>${known.map(p => `<tr><td>${esc(p)}</td><td><input type="number" min="0" step="1" name="${esc(p)}" inputmode="numeric"></td></tr>`).join("")}
       <tr><td><input type="text" id="novy" placeholder="Nový hráč (jméno)"></td><td><input type="number" min="0" step="1" id="novyb" placeholder="body"></td></tr></table>
-      <p><input type="password" id="heslo" placeholder="Heslo" value="${esc(store("zoliky-heslo") || "")}"> <button>Uložit hru</button></p>
+      <p><button>Uložit hru</button></p>
       <p id="zmsg" class="muted" role="status"></p></form></div>
       <div class="panel"><h2>Admin</h2>${admin()
         ? `<p>Jsi přihlášený jako admin – v záložce Hry můžeš hry mazat 🗑.</p><button id="odhlasit">Odhlásit</button>`
@@ -251,12 +253,10 @@ document.addEventListener("submit", async e => {
   if (v.length < 2) return msg.textContent = "Hru musí hrát aspoň 2 hráči.";
   if (v.some(x => !Number.isInteger(x) || x < 0)) return msg.textContent = "Body musí být celá čísla od 0.";
   if (!v.includes(0)) return msg.textContent = "Někdo musí zavřít (0 bodů).";
-  const heslo = $("#heslo").value;
   msg.textContent = "Ukládám…";
   try {
-    const r = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ heslo, hra }) }).then(x => x.json());
+    const r = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ heslo: ZAPIS_HESLO, hra }) }).then(x => x.json());
     if (!r.ok) return msg.textContent = r.chyba || "Uložení selhalo.";
-    store("zoliky-heslo", heslo);
     // když tabulka ještě nestihla, přidej hru lokálně
     await reload(s => { s.games.push(hra); if (novy) s.players.push(novy); });
     autoPlay();
