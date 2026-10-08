@@ -359,7 +359,7 @@ async function init() {
 // --- pohledy ---
 const TABS = { zebricek: "Žebříček", hry: "Hry", zapis: "Zápis hry", vyvoj: "Vývoj Elo", patch: "Patch notes", pravidla: "Pravidla", editor: "Editor", hraci: "Hráči", turnaj: "Turnaj", hodiny: "Hodiny", odznaky: "Odznaky", sezona: "Konec sezóny" };
 // Záložky jen pro admina (vývojářský režim) – náhled funkcí, které ještě nejsou pro všechny.
-const DEV_TABS = ["editor", "turnaj"];
+const DEV_TABS = ["editor", "turnaj", "sezona"];
 function render() {
   look();
   if (DEV_TABS.includes(tab) && !admin()) tab = "zebricek";
@@ -618,7 +618,7 @@ const DEFAULT_WEB = {
   barvy: { bg: "#010a13", panel: "#0a1428", gold: "#c8aa6e", gold2: "#f0e6d2", text: "#cdbe91", up: "#0acbe6", down: "#e84057" },
   css: "",
   patche: [
-    { nadpis: "Update 3.0 · 8. 10. 2026", text: "Nový vzhled a nové záložky.\n- Web má nový, čistší vzhled ve stylu klientu League of Legends a ikony místo emoji.\n- Světlý a tmavý režim: přepneš ho tlačítkem vpravo nahoře.\n- Žebříček ukazuje víc statistik: winrate pruh, změnu Elo za posledních 5 her, formu a peak.\n- Šachové hodiny: na telefonu uprostřed stolu ťukneš na svůj čas, na PC předáš tah mezerníkem. Za každou započatou minutu přes čas je +5 trestných bodů.\n- Odznaky: 12 achievementů za výhry, série, velké stoly a ranky.\n- Konec sezóny: ceny pro nejlepší hráče a animované vyhlášení.\n- Každou hru můžeš sdílet jako obrázek do skupiny (ikona u hry v záložce Hry)." },
+    { nadpis: "Update 3.0 · 8. 10. 2026", text: "Nový vzhled a nové záložky.\n- Web má nový, čistší vzhled ve stylu klientu League of Legends a ikony místo emoji.\n- Světlý a tmavý režim: přepneš ho tlačítkem vpravo nahoře.\n- Žebříček ukazuje víc statistik: winrate pruh, změnu Elo za posledních 5 her, formu a peak.\n- Šachové hodiny: na telefonu uprostřed stolu ťukneš na svůj čas, na PC předáš tah mezerníkem. Za každou započatou minutu přes čas je +5 trestných bodů.\n- Odznaky: 12 achievementů za výhry, série, velké stoly a ranky.\n- Každou hru můžeš sdílet jako obrázek do skupiny (ikona u hry v záložce Hry)." },
     { nadpis: "Patch 2.4.1 · 7. 10. 2026", text: "- Minulá sezóna je zamčená: když ji máš vybranou, Zápis hry ukáže jen odkaz na aktuální sezónu.\n- Web si sám stáhne nejnovější patch, vpravo nahoře je vidět, jaký patch běží." },
     { nadpis: "Patch 2.4 · 7. 10. 2026", text: "Nová záložka Hráči a plná podpora mobilu.\n- Záložka Hráči: najdeš hráče přes políčko Hledat (nevadí diakritika ani velká písmena).\n- U hráče uvidíš rank, Elo, winrate, hry, výhry a trestné body jako dlaždice, pod tím velký animovaný graf Elo.\n- Další statistiky: peak a bottom rank, nejdelší série výher, forma za posledních 5 her, největší zisk a ztráta Elo, nejlepší a nejhorší hra a nejčastější soupeř.\n- Porovnání: přidej víc hráčů a jejich grafy se překryjí, statistiky budou vedle sebe.\n- Zápis hry: kdo napíše 0, je hned označený jako vítěz.\n- Mobil: záložky se zalamují, grafy jsou čitelné a dlaždice jsou pod sebou." },
     { nadpis: "Patch 2.3 · 7. 10. 2026", text: "Zápis a grafy.\n- Body se píšou jen čísly, bez šipek nahoru a dolů.\n- Vítěze označíš tlačítkem 🏆 vítěz: dostane 0 bodů a ostatním se tlačítko zašedí.\n- Grafy Elo se při otevření postupně vykreslí hru po hře, kliknutím na graf se animace pustí znovu.\n- Nové hry mají u sebe datum a čas zápisu." },
