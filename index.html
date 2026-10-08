@@ -45,7 +45,7 @@ td{padding:8px 6px;border-top:1px solid #1e2328}
 .ed textarea[name=css]{font-family:ui-monospace,monospace}
 .ed input[type=color]{width:44px;height:30px;padding:0;vertical-align:middle}
 .pe{display:grid;gap:6px;padding:10px 0;border-bottom:1px solid #1e2328}
-#bubs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+#bubs,#cbubs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
 .bub{cursor:pointer}
 .bub input{position:absolute;opacity:0}
 .bub span,.bub.add{display:flex;align-items:center;gap:6px;padding:4px 14px 4px 6px;border:1px solid var(--line);border-radius:999px;background:#1e2328;color:var(--text);font-weight:600}
@@ -119,12 +119,122 @@ dialog::backdrop{background:#000a}
 @keyframes rays{0%{opacity:0;transform:rotate(0)}20%{opacity:.9}100%{opacity:.35;transform:rotate(60deg)}}
 @keyframes fadeIn{to{opacity:1}}
 @media(prefers-reduced-motion:reduce){#fx *{animation-duration:.01s!important;animation-delay:0s!important}}
+
+/* ===== Náhled nového vzhledu (jen admin): LoL klient + husté statistiky. Mřížka 4 px, stupnice písma 12/13/14/16/20/28. ===== */
+.ic{width:1em;height:1em;vertical-align:-.15em;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.hdr{display:flex;align-items:center;gap:8px}
+html[data-v3]{--bg:#0b0f15;--panel:#11161e;--panel2:#161c26;--line:#262d38;--frame:#5b4a26;--gold:#c8aa6e;--gold2:#f0e6d2;--text:#c4c8d0;--muted:#7f8896;--up:#36b3c7;--down:#e0505f;--in:#0d1219;color-scheme:dark}
+html[data-v3][data-theme=light]{--bg:#f2f0eb;--panel:#fff;--panel2:#f8f6f1;--line:#e2ddd2;--frame:#cdb88a;--gold:#8f7134;--gold2:#1d2026;--text:#3a3f48;--muted:#6f7682;--up:#0b7d90;--down:#c22f45;--in:#fff;color-scheme:light}
+html[data-v3] body{background:var(--bg);font:14px/1.5 Inter,system-ui,sans-serif;color:var(--text)}
+html[data-v3] h1{font:700 20px/1.2 Cinzel,serif;letter-spacing:.08em;display:flex;align-items:center;gap:8px}
+html[data-v3] h1 .ic{color:var(--gold);width:22px;height:22px}
+html[data-v3] h2{font:600 13px/1.4 Inter,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:var(--gold2);margin:0 0 12px}
+html[data-v3] .panel h2:first-child{padding-bottom:8px;border-bottom:1px solid var(--line)}
+html[data-v3] .muted,html[data-v3] .rk{font-size:12px;color:var(--muted)}
+html[data-v3] header,html[data-v3] nav,html[data-v3] main{max-width:1160px}
+html[data-v3] nav{border-color:var(--line);gap:0}
+html[data-v3] nav button{border:0;background:none;font-size:12px;letter-spacing:.08em;padding:12px 13px;color:var(--muted)}
+html[data-v3] nav button:hover{color:var(--gold2);background:none}
+html[data-v3] nav button.on{color:var(--gold2);box-shadow:inset 0 -2px var(--gold)}
+html[data-v3] .panel{background:var(--panel);border:1px solid var(--line);border-top-color:var(--frame);padding:16px;margin-bottom:16px;position:relative}
+html[data-v3] .panel::before{content:"";position:absolute;top:-1px;left:-1px;width:12px;height:12px;border-top:2px solid var(--gold);border-left:2px solid var(--gold)}
+html[data-v3] select,html[data-v3] button,html[data-v3] input{background:var(--panel2);color:var(--gold2);border:1px solid var(--frame);padding:6px 12px;font-size:13px}
+html[data-v3] button:hover{background:var(--line)}
+html[data-v3] button:disabled{opacity:.4;cursor:not-allowed}
+html[data-v3] .hbtn{font-size:12px;padding:4px 8px;display:inline-flex;align-items:center;gap:4px}
+html[data-v3] .pri{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:600}
+html[data-v3] .pri:hover{background:var(--gold2)}
+html[data-v3] th{font-size:12px;letter-spacing:.06em;color:var(--muted);padding:8px;border-bottom:1px solid var(--line);background:var(--panel2)}
+html[data-v3] td{padding:6px 8px;border-top:1px solid var(--line);font-size:13px}
+html[data-v3] .lb tr:hover td{background:var(--panel2)}
+html[data-v3] .lb td:first-child{color:var(--muted);width:32px;font-variant-numeric:tabular-nums}
+html[data-v3] .lb td b{font-size:14px;color:var(--gold2)}
+html[data-v3] .player{color:var(--gold2);font-weight:600;font-size:13px}
+html[data-v3] .num,html[data-v3] .tv b,html[data-v3] .stats b{font-variant-numeric:tabular-nums}
+html[data-v3] .emb{width:32px;height:32px}
+html[data-v3] .emb.sm{width:20px;height:20px}
+.wr{display:inline-block;width:56px;height:6px;background:var(--down);margin-right:8px;vertical-align:middle}
+.wr i{display:block;height:100%;background:var(--up)}
+.form{display:inline-flex;gap:2px}
+.form i{font-style:normal;width:24px;height:20px;display:grid;place-items:center;font-size:11px;font-variant-numeric:tabular-nums;background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+.form i.w{background:var(--up);border-color:var(--up);color:var(--bg);font-weight:700}
+.peak{display:inline-flex;align-items:center;gap:4px;font-variant-numeric:tabular-nums}
+html[data-v3] .game{border-color:var(--line);gap:4px 16px;padding:8px 0}
+html[data-v3] .game button{padding:4px 8px;line-height:1}
+html[data-v3] .chip{font-size:13px;font-variant-numeric:tabular-nums}
+html[data-v3] .card,html[data-v3] .tile,html[data-v3] .stats div{background:var(--panel2);border-color:var(--line)}
+html[data-v3] .card{border-color:var(--frame)}
+html[data-v3] .card.vitez{border-color:var(--up);box-shadow:inset 0 0 0 1px var(--up)}
+html[data-v3] .card input,html[data-v3] .hsearch input,html[data-v3] .ed textarea,html[data-v3] .ed input:not([type=color]){background:var(--in);color:var(--gold2);border-color:var(--frame)}
+html[data-v3] .bub span,html[data-v3] .bub.add{background:var(--panel2);border-color:var(--line);color:var(--text)}
+html[data-v3] .bub input:checked+span{background:var(--panel);border-color:var(--gold);color:var(--gold2);box-shadow:inset 0 0 0 1px var(--gold)}
+html[data-v3] .tv b{font-size:16px}
+html[data-v3] .tl{font-size:12px}
+html[data-v3] dialog{background:var(--panel);border-color:var(--frame);color:var(--text)}
+html[data-v3] td{border-top-color:var(--line)}
+html[data-v3] .chart text{fill:var(--muted)}
+/* náhled: turnaj, hodiny, odznaky, konec sezóny */
+.note{border-left:2px solid var(--gold);padding:8px 12px;background:var(--panel2,#0000);font-size:13px;margin:0 0 16px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+.cols>.panel{margin:0}
+.bracket{display:flex;gap:24px;overflow-x:auto;padding-bottom:8px}
+.round{display:flex;flex-direction:column;min-width:200px}
+.rm{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:12px}
+.round h3{font:600 12px/1 Inter,sans-serif;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 12px}
+.match{border:1px solid var(--line);background:var(--panel2,var(--panel));cursor:pointer}
+.match.on{border-color:var(--gold)}
+.match .s{display:flex;align-items:center;gap:8px;padding:6px 8px;font-size:13px}
+.match .s+.s{border-top:1px solid var(--line)}
+.match .s span{flex:1;color:var(--gold2)}
+.match .s.lose span{color:var(--muted)}
+.match .s.win b{color:var(--up)}
+.match .s i{font-style:normal;color:var(--muted);font-size:11px;width:16px;font-variant-numeric:tabular-nums}
+.match .s b{font-variant-numeric:tabular-nums}
+.duel{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;align-items:end}
+.duel label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
+.duel input{font-size:20px;text-align:center;width:100%}
+.clock{position:fixed;inset:0;z-index:40;background:var(--bg);display:grid;grid-template-rows:1fr auto;user-select:none;-webkit-user-select:none}
+.cgrid{display:grid;gap:4px;padding:4px}
+.cgrid.two{grid-template-rows:1fr 1fr}
+.cgrid.two .ct:first-child{transform:rotate(180deg)}
+.cgrid.many{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.ct{border:1px solid var(--line);background:var(--panel);display:grid;place-content:center;text-align:center;gap:4px;cursor:pointer;touch-action:manipulation}
+.ct .n{font-size:16px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.ct .t{font:600 clamp(40px,14vw,104px)/1 Inter,sans-serif;font-variant-numeric:tabular-nums;color:var(--gold2)}
+.ct .pen{font-size:14px;color:var(--down);min-height:20px}
+.ct.act{background:var(--panel2,var(--panel));border-color:var(--gold);box-shadow:inset 0 0 0 2px var(--gold)}
+.ct.act .n{color:var(--gold)}
+.ct.over .t{color:var(--down)}
+.cbar{display:flex;gap:8px;justify-content:center;padding:8px;border-top:1px solid var(--line);background:var(--panel)}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.badge{display:grid;grid-template-columns:48px 1fr;gap:4px 12px;border:1px solid var(--line);padding:12px;background:var(--panel2,var(--panel))}
+.badge svg{grid-row:span 3;width:48px;height:48px}
+.badge b{color:var(--gold2);font-size:14px}
+.badge small{color:var(--muted);font-size:12px}
+.badge .who{font-size:12px}
+.badge.none{opacity:.5}
+.awards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.award{border:1px solid var(--frame,var(--line));padding:12px;display:grid;gap:4px;background:var(--panel2,var(--panel))}
+.award .tl{margin:0}
+.award b{color:var(--gold2);font-size:16px}
+#fx .aw{font-family:Cinzel,serif;font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);opacity:0;animation:fadeIn .6s .3s forwards;text-align:center}
+#fx.awfx .new{animation:newUp 1s .6s forwards}
+#fx.awfx .title{color:var(--gold2);animation-delay:1.2s}
+#fx.awfx .sub{animation-delay:1.4s}
+#fx.awfx .rays{animation:rays 3s .6s forwards}
+@media(max-width:600px){
+  html[data-v3] nav button{padding:8px 10px}
+  html[data-v3] .panel{padding:12px}
+  .cols{grid-template-columns:1fr}
+  .wr{display:none}
+}
 </style>
 </head>
 <body>
 <header>
   <h1>🃏 Liga žolíků</h1>
-  <div><span id="ver" class="muted"></span> <select id="season" aria-label="Sezóna"></select></div>
+  <div class="hdr"><span id="ver" class="muted"></span><span id="nahled"></span> <select id="season" aria-label="Sezóna"></select></div>
 </header>
 <nav id="tabs"></nav>
 <main id="view"></main>
@@ -148,6 +258,32 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":
 const rank = e => rankOf(e, D.ranks);
 const tier = r => D.ranks.findIndex(x => x[0] === r);
 const fmt = e => Math.round(e);
+// Ikony: v novém vzhledu jedna sada SVG, ve starém zůstávají emoji.
+const ICON = {
+  trophy: "M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3",
+  play: "M7 4l13 8-13 8z", trash: "M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3",
+  up: "M12 19V5M5 12l7-7 7 7", down: "M12 5v14M5 12l7 7 7-7", lock: "M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3",
+  x: "M6 6l12 12M18 6 6 18", plus: "M12 5v14M5 12h14", check: "M5 12l5 5 9-10",
+  sun: "M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5",
+  moon: "M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10z", share: "M12 3v12M7 8l5-5 5 5M5 14v6h14v-6",
+  clock: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2", pause: "M8 5v14M16 5v14",
+  card: "M7 3h10a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM12 8l3 4-3 4-3-4z",
+  full: "M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5", eye: "M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"
+};
+const EMOJI = { trophy: "🏆", play: "▶", trash: "🗑", up: "⬆", down: "⬇", lock: "🔒", x: "✕", card: "🃏" };
+const v3 = () => document.documentElement.hasAttribute("data-v3");
+const ic = n => v3() || !EMOJI[n] ? `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[n]}"/></svg>` : EMOJI[n];
+// Náhled nového vzhledu vidí jen admin (vypínač v hlavičce); ostatní mají vzhled 2.4.1.
+function look() {
+  const on = !!admin() && store("zoliky-v3") !== "0", el = document.documentElement;
+  if (on !== v3()) { el.toggleAttribute("data-v3", on); applyWeb(); }
+  el.dataset.theme = on && store("zoliky-theme") === "light" ? "light" : "dark";
+  $("#nahled").innerHTML = admin() ? ` <button type="button" class="hbtn" id="v3t" aria-pressed="${on}" title="Náhled nového vzhledu">${on ? "Nový vzhled" : "Starý vzhled"}</button>${on ? ` <button type="button" class="hbtn" id="theme" aria-label="Přepnout světlý / tmavý režim">${ic(el.dataset.theme === "light" ? "moon" : "sun")}</button>` : ""}` : "";
+}
+document.addEventListener("click", e => {
+  if (e.target.closest("#v3t")) { store("zoliky-v3", v3() ? "0" : "1"); render(); }
+  if (e.target.closest("#theme")) { store("zoliky-theme", document.documentElement.dataset.theme === "light" ? "dark" : "light"); render(); }
+});
 const store = (k, v) => { try { return v === undefined ? localStorage.getItem(k) : localStorage.setItem(k, v); } catch { return null; } };
 
 function emblem(r, cls = "emb") {
@@ -192,7 +328,7 @@ async function ensureFresh() {
     const { v } = await fetch("version.json", { cache: "no-store" }).then(r => r.json());
     if (v === VERSION || sessionStorage.getItem("zoliky-reload") === v) return;
     sessionStorage.setItem("zoliky-reload", v);
-    await Promise.all([location.pathname, "elo.js", "data.json"].map(u => fetch(u, { cache: "reload" })));
+    await Promise.all([location.pathname, "elo.js", "nahled.js", "data.json"].map(u => fetch(u, { cache: "reload" })));
     location.reload();
     await new Promise(() => {}); // stránka se obnovuje
   } catch {}
@@ -216,10 +352,11 @@ async function init() {
 }
 
 // --- pohledy ---
-const TABS = { zebricek: "Žebříček", hry: "Hry", zapis: "Zápis hry", vyvoj: "Vývoj Elo", patch: "Patch notes", pravidla: "Pravidla", editor: "🛠 Editor", hraci: "Hráči" };
+const TABS = { zebricek: "Žebříček", hry: "Hry", zapis: "Zápis hry", vyvoj: "Vývoj Elo", patch: "Patch notes", pravidla: "Pravidla", editor: "Editor", hraci: "Hráči", turnaj: "Turnaj", hodiny: "Hodiny", odznaky: "Odznaky", sezona: "Konec sezóny" };
 // Záložky jen pro admina (vývojářský režim) – náhled funkcí, které ještě nejsou pro všechny.
-const DEV_TABS = ["editor"];
+const DEV_TABS = ["editor", "turnaj", "hodiny", "odznaky", "sezona"];
 function render() {
+  look();
   if (DEV_TABS.includes(tab) && !admin()) tab = "zebricek";
   $("#tabs").innerHTML = Object.entries(TABS).filter(([k]) => !DEV_TABS.includes(k) || admin()).map(([k, v]) => `<button class="${k === tab ? "on" : ""}" data-t="${k}">${v}</button>`).join("");
   $("#tabs").onclick = e => { if (e.target.dataset.t) { tab = e.target.dataset.t; render(); } };
@@ -235,22 +372,23 @@ const VIEWS = {
     const rows = table.map((s, i) => { const r = rank(s.elo); return `<tr>
       <td>${i + 1}</td><td><div class="player" data-p="${esc(s.p)}">${emblem(r)}<div>${esc(s.p)}<div class="rk">${r}</div></div></div></td>
       <td class="num"><b>${fmt(s.elo)}</b></td><td class="num">${s.games}</td><td class="num hide-sm">${s.wins}</td>
-      <td class="num">${Math.round(100 * s.wins / s.games)}%</td><td class="num hide-sm">${(s.pts / s.games).toFixed(1).replace(".", ",")}</td></tr>`; }).join("");
+      <td class="num">${v3() ? wrbar(s) : Math.round(100 * s.wins / s.games) + "%"}</td><td class="num hide-sm">${(s.pts / s.games).toFixed(1).replace(".", ",")}</td>${v3() ? extra(s) : ""}</tr>`; }).join("");
     return `<div class="panel"><h2>${esc(cur.name)}</h2><p class="muted">${hist.length} her · ${table.length} hráčů${cur.id === D.seasons[0].id ? " · data: " + D.src : " · archiv, do aktuálního Elo se nepočítá"}</p>
-      <table><tr><th>#</th><th>Hráč</th><th class="num">Elo</th><th class="num">Hry</th><th class="num hide-sm">Výhry</th><th class="num">Win%</th><th class="num hide-sm">Ø body</th></tr>${rows}</table></div>
+      <table class="lb"><tr><th>#</th><th>Hráč</th><th class="num">Elo</th><th class="num">Hry</th><th class="num hide-sm">Výhry</th><th class="num">Win%</th><th class="num hide-sm">Ø body</th>${v3() ? `<th class="num hide-sm">Δ 5 her</th><th class="hide-sm">Forma</th><th class="hide-sm">Peak</th>` : ""}</tr>${rows}</table></div>
 `;
   },
   hry() {
     const { hist } = S[cur.id];
-    return `<div class="panel"><h2>Hry</h2><p class="muted">0 = zavřel. U her se změnou ranku můžeš animaci přehrát ▶.</p>${hist.map((h, i) => {
+    return `<div class="panel"><h2>Hry</h2><p class="muted">0 = zavřel. U her se změnou ranku můžeš animaci přehrát ${ic("play")}.</p>${hist.map((h, i) => {
       const ps = Object.entries(h.game).sort((a, b) => a[1] - b[1]);
       const changed = ps.some(([p]) => rank(h.before[p]) !== rank(h.after[p]));
       const t = cur.times?.[i] && new Date(cur.times[i]);
       return `<div class="game"><b>#${i + 1}</b>${t && !isNaN(t) ? `<span class="muted">${t.toLocaleString("cs-CZ", { day: "numeric", month: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>` : ""}${ps.map(([p, v]) => { const d = fmt(h.after[p]) - fmt(h.before[p]);
-        const rc = rank(h.after[p]) !== rank(h.before[p]) ? (tier(rank(h.after[p])) > tier(rank(h.before[p])) ? " ⬆" : " ⬇") : "";
-        return `<span class="chip">${name(p)} ${v === 0 ? "🏆" : v} <span class="${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}${rc}</span></span>`; }).join("")}
-        ${changed ? `<button data-play="${i}" aria-label="Přehrát animaci">▶</button>` : ""}
-        ${admin() && cur === D.seasons[0] ? `<button data-del="${i}" aria-label="Smazat hru">🗑</button>` : ""}</div>`; }).reverse().join("")}</div>`;
+        const rc = rank(h.after[p]) !== rank(h.before[p]) ? (tier(rank(h.after[p])) > tier(rank(h.before[p])) ? " " + ic("up") : " " + ic("down")) : "";
+        return `<span class="chip">${name(p)} ${v === 0 ? ic("trophy") : v} <span class="${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}${rc}</span></span>`; }).join("")}
+        ${changed ? `<button data-play="${i}" aria-label="Přehrát animaci">${ic("play")}</button>` : ""}
+        ${admin() && cur === D.seasons[0] ? `<button data-del="${i}" aria-label="Smazat hru">${ic("trash")}</button>` : ""}
+        ${admin() && v3() ? `<button data-share="${i}" aria-label="Sdílet jako obrázek">${ic("share")}</button>` : ""}</div>`; }).reverse().join("")}</div>`;
   },
   vyvoj() {
     const { hist, table } = S[cur.id];
@@ -260,7 +398,7 @@ const VIEWS = {
     const s = D.seasons[0];
     if (!SCRIPT_URL) return `<div class="panel"><h2>Zápis hry</h2><p>Zápis ještě není propojený s tabulkou (chybí adresa Apps Scriptu).</p></div>`;
     // Starší sezóny jsou archiv – zapisovat jde jen do aktuální.
-    if (cur !== s) return `<div class="panel"><h2>Zápis hry</h2><p>🔒 ${esc(cur.name)} je uzavřený archiv, do ní se už hry nezapisují.</p><button type="button" id="tocur">Přepnout na ${esc(s.name)}</button></div>`;
+    if (cur !== s) return `<div class="panel"><h2>Zápis hry</h2><p>${ic("lock")} ${esc(cur.name)} je uzavřený archiv, do ní se už hry nezapisují.</p><button type="button" id="tocur">Přepnout na ${esc(s.name)}</button></div>`;
     winner = null;
     const known = S[s.id].table.map(x => x.p).concat(s.players.filter(p => !S[s.id].st[p].games));
     return `<div class="panel"><h2>Zápis hry · ${esc(s.name)} #${S[s.id].hist.length + 1}</h2>
@@ -270,7 +408,7 @@ const VIEWS = {
       <p><button>Uložit hru</button></p>
       <p id="zmsg" class="muted" role="status"></p></form></div>
       <div class="panel"><h2>Admin</h2>${admin()
-        ? `<p>Jsi přihlášený jako admin – v záložce Hry můžeš hry mazat 🗑 a v záložce 🛠 Editor upravovat web.</p><button id="odhlasit">Odhlásit</button>`
+        ? `<p>Jsi přihlášený jako admin – v záložce Hry můžeš hry mazat ${ic("trash")} a v záložce Editor upravovat web.</p><button id="odhlasit">Odhlásit</button>`
         : `<form id="af"><input type="password" id="aheslo" placeholder="Admin heslo"> <button>Přihlásit</button> <span id="amsg" class="muted" role="status"></span></form>`}</div>`;
   },
   patch() {
@@ -283,9 +421,9 @@ const VIEWS = {
     // Jedna dlaždice = jedna statistika, uvnitř hodnota pro každého vybraného hráče (barva = jeho čára v grafu).
     const row = (label, f) => `<div class="tile"><div class="tl">${label}</div>${ps.map((x, j) => `<div class="tv" style="--c:${LINE[j % LINE.length]}">${cmp.length > 1 ? `<span>${esc(x.p)}</span>` : ""}<b>${f(x)}</b></div>`).join("")}</div>`;
     return `<div class="panel"><h2>Hráči</h2>
-      <form id="hf" class="hsearch" role="search"><input id="hsearch" type="search" placeholder="🔍 Hledat hráče…" autocomplete="off" aria-label="Hledat hráče"><button>Hledat</button></form>
+      <form id="hf" class="hsearch" role="search"><input id="hsearch" type="search" placeholder="${v3() ? "Hledat hráče…" : "🔍 Hledat hráče…"}" autocomplete="off" aria-label="Hledat hráče"><button>Hledat</button></form>
       <div id="hres" class="hres">${hres("")}</div>
-      <p>${cmp.map((p, j) => `<button type="button" class="hchip" style="--c:${LINE[j % LINE.length]}" data-hdel="${esc(p)}" aria-label="Odebrat ${esc(p)}">${esc(p)} ✕</button>`).join("")}</p>
+      <p>${cmp.map((p, j) => `<button type="button" class="hchip" style="--c:${LINE[j % LINE.length]}" data-hdel="${esc(p)}" aria-label="Odebrat ${esc(p)}">${esc(p)} ${ic("x")}</button>`).join("")}</p>
       ${cmp.length ? "" : `<p class="muted">Vyber hráče. Přidáním dalších je porovnáš – grafy se překryjí a statistiky budou vedle sebe.</p>`}</div>
     ${cmp.length ? `<div class="hgrid">${ps.map((x, j) => `<div class="panel hcard" style="--c:${LINE[j % LINE.length]}">
         <div class="player" style="cursor:auto">${emblem(x.rank, "emb\" style=\"width:64px;height:64px")}<div><h2 style="margin:0">${esc(x.p)}</h2><div class="rk">${x.rank} · <b>${fmt(x.elo)}</b> Elo · ${x.pos}. v žebříčku</div></div></div></div>`).join("")}</div>
@@ -339,6 +477,14 @@ const VIEWS = {
   }
 };
 
+// Nový vzhled: hustší žebříček jako op.gg (winrate pruh, trend, forma, peak).
+const wrbar = s => { const w = Math.round(100 * s.wins / s.games); return `<span class="wr"><i style="width:${w}%"></i></span>${w}%`; };
+function extra(s) {
+  const mine = S[cur.id].hist.filter(h => s.p in h.game).slice(-5), d = mine.length ? fmt(mine.at(-1).after[s.p]) - fmt(mine[0].before[s.p]) : 0;
+  return `<td class="num hide-sm ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</td>
+    <td class="hide-sm"><span class="form">${mine.map(h => h.game[s.p] === 0 ? `<i class="w" title="výhra">V</i>` : `<i title="${h.game[s.p]} bodů">${h.game[s.p]}</i>`).join("")}</span></td>
+    <td class="hide-sm"><span class="peak">${emblem(rank(s.max), "emb sm")}${fmt(s.max)}</span></td>`;
+}
 function chart(hist, players, w = 900, h = 320) {
   // Na mobilu užší plátno, ať popisky nejsou mikroskopické.
   if (innerWidth < 600) { h = Math.round(h * .9); w = 420; }
@@ -377,7 +523,7 @@ function pstats(p) {
     pos: table.findIndex(x => x.p === p) + 1,
     max: s.max, min: s.min, peakRank: rank(s.max), bottomRank: rank(s.min),
     bestStreak: best,
-    form: pts.slice(-5).map(v => v === 0 ? "🏆" : v).join(" · ") || "—",
+    form: pts.slice(-5).map(v => v === 0 ? ic("trophy") : v).join(" · ") || "—",
     bestGain: deltas.length ? sign(Math.max(...deltas)) : "—",
     worstLoss: deltas.length ? sign(Math.min(...deltas)) : "—",
     avgDelta: deltas.length ? (d => (d >= 0 ? "+" : "") + d.toFixed(1).replace(".", ","))(deltas.reduce((a, b) => a + b, 0) / deltas.length) : "—",
@@ -437,7 +583,7 @@ function cards() {
   if (!picked.includes(winner)) winner = null;
   $("#sel").innerHTML = picked.map(p => { const w = p === winner; return `<div class="card${w ? " vitez" : ""}"><b>${esc(p)}</b>
     <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off" name="${esc(p)}" value="${w ? 0 : esc(vals[p] ?? "")}" placeholder="body" aria-label="Body ${esc(p)}" ${w ? "disabled" : ""}>
-    <button type="button" class="win" data-win="${esc(p)}" ${winner && !w ? "disabled" : ""} aria-pressed="${w}">🏆 ${w ? "vítěz ✓" : "vítěz"}</button></div>`; }).join("");
+    <button type="button" class="win" data-win="${esc(p)}" ${winner && !w ? "disabled" : ""} aria-pressed="${w}">${ic("trophy")} ${w ? "vítěz ✓" : "vítěz"}</button></div>`; }).join("");
 }
 // do políček s body jdou napsat jen číslice
 document.addEventListener("input", e => {
@@ -483,8 +629,9 @@ function txt(t) {
     .replace(/(<li>.*?<\/li>)+/g, m => `<ul>${m}</ul>`);
 }
 function applyWeb() {
-  for (const [k, v] of Object.entries(WEB.barvy)) document.documentElement.style.setProperty("--" + k, v);
-  $("h1").textContent = "🃏 " + WEB.nazev;
+  // Nový vzhled má vlastní paletu (tmavou i světlou), barvy z editoru platí jen pro starý.
+  for (const [k, v] of Object.entries(WEB.barvy)) v3() ? document.documentElement.style.removeProperty("--" + k) : document.documentElement.style.setProperty("--" + k, v);
+  $("h1").innerHTML = (v3() ? ic("card") : "🃏") + " " + esc(WEB.nazev);
   document.title = WEB.nazev;
   ($("#customcss") || document.head.appendChild(Object.assign(document.createElement("style"), { id: "customcss" }))).textContent = WEB.css;
 }
@@ -580,5 +727,6 @@ function autoPlay() {
 
 init();
 </script>
+<script src="nahled.js?v=2.4.1"></script>
 </body>
 </html>
