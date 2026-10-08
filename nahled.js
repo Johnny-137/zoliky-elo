@@ -1,4 +1,4 @@
-// Náhled pro admina (DEV_TABS v index.html): turnaj, šachové hodiny, odznaky, konec sezóny, sdílení hry jako obrázek.
+// Update 3.0: šachové hodiny, odznaky, konec sezóny, sdílení hry jako obrázek. Turnaj je zatím jen pro admina (DEV_TABS v index.html).
 // Turnaj je zatím testovací: ukládá se jen v tomto prohlížeči a do Elo ligy se nepočítá.
 
 // --- turnaj: přihlášky, pavouk 1 na 1, testovací Elo ---
@@ -138,7 +138,7 @@ const ctime = ms => { const a = Math.abs(ms), s = Math.ceil(a / 1000) - (ms < 0 
 VIEWS.hodiny = () => {
   const ps = S[D.seasons[0].id].table.map(x => x.p);
   return `<div class="panel"><h2>Šachové hodiny</h2>
-    <p class="muted">Telefon polož doprostřed stolu. Kdo dohraje tah, ťukne na svůj čas a hodiny běží dalšímu. Za každou započatou minutu přes čas je +${PEN} trestných bodů.</p>
+    <p class="muted">Telefon polož doprostřed stolu: kdo dohraje tah, ťukne na svůj čas a hodiny běží dalšímu. Na PC předáš tah mezerníkem (nebo kliknutím), P je pauza a F celá obrazovka. Za každou započatou minutu přes čas je +${PEN} trestných bodů.</p>
     <div id="cbubs">${ps.map(p => `<label class="bub"><input type="checkbox" data-cp="${esc(p)}" ${cpick.includes(p) ? "checked" : ""}><span>${emblem(rank(leagueElo(p)))}${esc(p)}</span></label>`).join("")}</div>
     <p class="muted">Pořadí tahů: ${cpick.map(esc).join(" → ") || "vyber hráče"}</p>
     <p class="row"><label>Čas na hráče <input id="cmin" inputmode="numeric" maxlength="2" value="${cmin}" style="width:56px;text-align:center"> min</label>
@@ -161,7 +161,7 @@ function clockStart(ps, min, back) {
   const el = document.createElement("div");
   el.className = "clock"; el.id = "clock";
   el.innerHTML = `<div class="cgrid ${ps.length === 2 ? "two" : "many"}">${ps.map((p, i) => `<div class="ct" data-ci="${i}"><div class="n">${esc(p)}</div><div class="t"></div><div class="pen"></div></div>`).join("")}</div>
-    <div class="cbar"><button type="button" id="cpause">${ic("pause")} Pauza</button><button type="button" id="cfull">${ic("full")} Celá obrazovka</button><button type="button" id="cend">Konec hry</button></div>`;
+    <div class="cbar"><span class="muted khint">Mezerník = další hráč · P = pauza · F = celá obrazovka</span><button type="button" id="cpause">${ic("pause")} Pauza</button><button type="button" id="cfull">${ic("full")} Celá obrazovka</button><button type="button" id="cend">Konec hry</button></div>`;
   document.body.appendChild(el);
   navigator.wakeLock?.request("screen").then(l => C.lock = l).catch(() => {});
   C.iv = setInterval(ctick, 100); ctick();
@@ -176,10 +176,19 @@ function ctick() {
     el.querySelector(".pen").textContent = C.left[i] < 0 ? `+${cpen(C.left[i])} bodů` : "";
   });
 }
+const cpass = () => { if (!C.run) return; ctick(); C.act = (C.act + 1) % C.ps.length; ctick(); navigator.vibrate?.(30); };
 document.addEventListener("pointerdown", e => {
   if (!C) return;
   const t = e.target.closest("[data-ci]");
-  if (t && +t.dataset.ci === C.act && C.run) { ctick(); C.act = (C.act + 1) % C.ps.length; ctick(); navigator.vibrate?.(30); }
+  if (t && +t.dataset.ci === C.act) cpass();
+});
+// Na PC: mezerník nebo Enter předá tah, P pauza, F celá obrazovka.
+document.addEventListener("keydown", e => {
+  if (!C || e.repeat) return;
+  const k = e.key.toLowerCase();
+  if (k === " " || k === "enter") { e.preventDefault(); cpass(); }
+  else if (k === "p") $("#cpause").click();
+  else if (k === "f") $("#cfull").click();
 });
 document.addEventListener("click", e => {
   if (!C) return;

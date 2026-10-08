@@ -198,6 +198,10 @@ html[data-v3] .chart text{fill:var(--muted)}
 .cgrid{display:grid;gap:4px;padding:4px}
 .cgrid.two{grid-template-rows:1fr 1fr}
 .cgrid.two .ct:first-child{transform:rotate(180deg)}
+.khint{align-self:center;margin-right:auto}
+@media(hover:none){.khint{display:none}}
+/* PC: dva hráči vedle sebe bez otočení, víc hráčů v řadě */
+@media(min-width:900px) and (hover:hover){.cgrid.two{grid-template-rows:1fr;grid-template-columns:1fr 1fr}.cgrid.two .ct:first-child{transform:none}.ct .t{font-size:clamp(64px,9vw,160px)}.cbar{justify-content:flex-end}}
 .cgrid.many{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
 .ct{border:1px solid var(--line);background:var(--panel);display:grid;place-content:center;text-align:center;gap:4px;cursor:pointer;touch-action:manipulation}
 .ct .n{font-size:16px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
@@ -241,7 +245,7 @@ html[data-v3] .chart text{fill:var(--muted)}
 <dialog id="profile"></dialog>
 <div id="fx" title="Klikni pro pokračování"></div>
 
-<script src="elo.js?v=2.4.1"></script>
+<script src="elo.js?v=3.0"></script>
 <script>
 // Hry aktuální sezóny se čtou živě z Google tabulky (list Hry); když to nejde, použije se kopie v data.json.
 // Adresa webové aplikace z Apps Scriptu (zapis.gs) – přes ni web zapisuje nové hry do tabulky.
@@ -273,12 +277,13 @@ const ICON = {
 const EMOJI = { trophy: "🏆", play: "▶", trash: "🗑", up: "⬆", down: "⬇", lock: "🔒", x: "✕", card: "🃏" };
 const v3 = () => document.documentElement.hasAttribute("data-v3");
 const ic = n => v3() || !EMOJI[n] ? `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[n]}"/></svg>` : EMOJI[n];
-// Náhled nového vzhledu vidí jen admin (vypínač v hlavičce); ostatní mají vzhled 2.4.1.
+// Nový vzhled (Update 3.0) mají všichni; admin si může přepnout na starý pro porovnání.
 function look() {
-  const on = !!admin() && store("zoliky-v3") !== "0", el = document.documentElement;
+  const on = !admin() || store("zoliky-v3") !== "0", el = document.documentElement;
   if (on !== v3()) { el.toggleAttribute("data-v3", on); applyWeb(); }
   el.dataset.theme = on && store("zoliky-theme") === "light" ? "light" : "dark";
-  $("#nahled").innerHTML = admin() ? ` <button type="button" class="hbtn" id="v3t" aria-pressed="${on}" title="Náhled nového vzhledu">${on ? "Nový vzhled" : "Starý vzhled"}</button>${on ? ` <button type="button" class="hbtn" id="theme" aria-label="Přepnout světlý / tmavý režim">${ic(el.dataset.theme === "light" ? "moon" : "sun")}</button>` : ""}` : "";
+  $("#nahled").innerHTML = (admin() ? ` <button type="button" class="hbtn" id="v3t" aria-pressed="${on}" title="Přepnout starý / nový vzhled">${on ? "Nový vzhled" : "Starý vzhled"}</button>` : "")
+    + (on ? ` <button type="button" class="hbtn" id="theme" aria-label="Přepnout světlý / tmavý režim">${ic(el.dataset.theme === "light" ? "moon" : "sun")}</button>` : "");
 }
 document.addEventListener("click", e => {
   if (e.target.closest("#v3t")) { store("zoliky-v3", v3() ? "0" : "1"); render(); }
@@ -322,7 +327,7 @@ async function live() {
 
 // Verze webu: při vydání patche změň VERSION i version.json. Když prohlížeč drží starou verzi
 // (GitHub Pages ji cachuje ~10 min), stáhne novou a stránku jednou obnoví.
-const VERSION = "2.4.1";
+const VERSION = "3.0";
 async function ensureFresh() {
   try {
     const { v } = await fetch("version.json", { cache: "no-store" }).then(r => r.json());
@@ -354,7 +359,7 @@ async function init() {
 // --- pohledy ---
 const TABS = { zebricek: "Žebříček", hry: "Hry", zapis: "Zápis hry", vyvoj: "Vývoj Elo", patch: "Patch notes", pravidla: "Pravidla", editor: "Editor", hraci: "Hráči", turnaj: "Turnaj", hodiny: "Hodiny", odznaky: "Odznaky", sezona: "Konec sezóny" };
 // Záložky jen pro admina (vývojářský režim) – náhled funkcí, které ještě nejsou pro všechny.
-const DEV_TABS = ["editor", "turnaj", "hodiny", "odznaky", "sezona"];
+const DEV_TABS = ["editor", "turnaj"];
 function render() {
   look();
   if (DEV_TABS.includes(tab) && !admin()) tab = "zebricek";
@@ -388,7 +393,7 @@ const VIEWS = {
         return `<span class="chip">${name(p)} ${v === 0 ? ic("trophy") : v} <span class="${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}${rc}</span></span>`; }).join("")}
         ${changed ? `<button data-play="${i}" aria-label="Přehrát animaci">${ic("play")}</button>` : ""}
         ${admin() && cur === D.seasons[0] ? `<button data-del="${i}" aria-label="Smazat hru">${ic("trash")}</button>` : ""}
-        ${admin() && v3() ? `<button data-share="${i}" aria-label="Sdílet jako obrázek">${ic("share")}</button>` : ""}</div>`; }).reverse().join("")}</div>`;
+        ${v3() ? `<button data-share="${i}" aria-label="Sdílet jako obrázek">${ic("share")}</button>` : ""}</div>`; }).reverse().join("")}</div>`;
   },
   vyvoj() {
     const { hist, table } = S[cur.id];
@@ -613,6 +618,7 @@ const DEFAULT_WEB = {
   barvy: { bg: "#010a13", panel: "#0a1428", gold: "#c8aa6e", gold2: "#f0e6d2", text: "#cdbe91", up: "#0acbe6", down: "#e84057" },
   css: "",
   patche: [
+    { nadpis: "Update 3.0 · 8. 10. 2026", text: "Nový vzhled a nové záložky.\n- Web má nový, čistší vzhled ve stylu klientu League of Legends a ikony místo emoji.\n- Světlý a tmavý režim: přepneš ho tlačítkem vpravo nahoře.\n- Žebříček ukazuje víc statistik: winrate pruh, změnu Elo za posledních 5 her, formu a peak.\n- Šachové hodiny: na telefonu uprostřed stolu ťukneš na svůj čas, na PC předáš tah mezerníkem. Za každou započatou minutu přes čas je +5 trestných bodů.\n- Odznaky: 12 achievementů za výhry, série, velké stoly a ranky.\n- Konec sezóny: ceny pro nejlepší hráče a animované vyhlášení.\n- Každou hru můžeš sdílet jako obrázek do skupiny (ikona u hry v záložce Hry)." },
     { nadpis: "Patch 2.4.1 · 7. 10. 2026", text: "- Minulá sezóna je zamčená: když ji máš vybranou, Zápis hry ukáže jen odkaz na aktuální sezónu.\n- Web si sám stáhne nejnovější patch, vpravo nahoře je vidět, jaký patch běží." },
     { nadpis: "Patch 2.4 · 7. 10. 2026", text: "Nová záložka Hráči a plná podpora mobilu.\n- Záložka Hráči: najdeš hráče přes políčko Hledat (nevadí diakritika ani velká písmena).\n- U hráče uvidíš rank, Elo, winrate, hry, výhry a trestné body jako dlaždice, pod tím velký animovaný graf Elo.\n- Další statistiky: peak a bottom rank, nejdelší série výher, forma za posledních 5 her, největší zisk a ztráta Elo, nejlepší a nejhorší hra a nejčastější soupeř.\n- Porovnání: přidej víc hráčů a jejich grafy se překryjí, statistiky budou vedle sebe.\n- Zápis hry: kdo napíše 0, je hned označený jako vítěz.\n- Mobil: záložky se zalamují, grafy jsou čitelné a dlaždice jsou pod sebou." },
     { nadpis: "Patch 2.3 · 7. 10. 2026", text: "Zápis a grafy.\n- Body se píšou jen čísly, bez šipek nahoru a dolů.\n- Vítěze označíš tlačítkem 🏆 vítěz: dostane 0 bodů a ostatním se tlačítko zašedí.\n- Grafy Elo se při otevření postupně vykreslí hru po hře, kliknutím na graf se animace pustí znovu.\n- Nové hry mají u sebe datum a čas zápisu." },
@@ -727,6 +733,6 @@ function autoPlay() {
 
 init();
 </script>
-<script src="nahled.js?v=2.4.1"></script>
+<script src="nahled.js?v=3.0"></script>
 </body>
 </html>
