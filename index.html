@@ -487,7 +487,7 @@ const wrbar = s => { const w = Math.round(100 * s.wins / s.games); return `<span
 function extra(s) {
   const mine = S[cur.id].hist.filter(h => s.p in h.game).slice(-5), d = mine.length ? fmt(mine.at(-1).after[s.p]) - fmt(mine[0].before[s.p]) : 0;
   return `<td class="num hide-sm ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</td>
-    <td class="hide-sm"><span class="form">${mine.map(h => h.game[s.p] === 0 ? `<i class="w" title="výhra">V</i>` : `<i title="${h.game[s.p]} bodů">${h.game[s.p]}</i>`).join("")}</span></td>
+    <td class="hide-sm"><span class="form" title="nejnovější hra vlevo">${mine.slice().reverse().map(h => h.game[s.p] === 0 ? `<i class="w" title="výhra">V</i>` : `<i title="${h.game[s.p]} bodů">${h.game[s.p]}</i>`).join("")}</span></td>
     <td class="hide-sm"><span class="peak">${emblem(rank(s.max), "emb sm")}${fmt(s.max)}</span></td>`;
 }
 function chart(hist, players, w = 900, h = 320) {
